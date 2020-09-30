@@ -1,0 +1,18 @@
+import { ControllerType } from "./types";
+export declare function postDataNotJSON(data: string): Error;
+export declare function arugmentNull(name: string): Error;
+export declare function arugmentFieldNull(fieldName: string, argumentName: string): Error;
+export declare function controllerDirectoryNotExists(dir: string): Error;
+export declare function controlRegister(type: ControllerType<any>): Error;
+export declare function controllerDirectoriesNull(): Error;
+export declare function unexpectedNullValue(name: string): Error;
+export declare function onlyOneAction(methodName: string): Error;
+export declare function rootPathNull(): Error;
+export declare function rootPathNotAbsolute(path: string): Error;
+export declare function authenticateResultNull(): Error;
+export declare function notAbsolutePath(path: string): Error;
+export declare function pageNotFound(path: string): Error;
+export declare function requestNotReadable(): Error;
+export declare function connectionClose(): Error;
+export declare function physicalPathNotExists(physicalPath: string): Error;
+export declare function virtualPathConfigError(virtualPath: string, physicalPath: string): Error;
