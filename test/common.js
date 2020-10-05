@@ -11,12 +11,11 @@ function createWebserver(settings) {
         // rootPath: __dirname,
         // staticRootDirectory: path.join(__dirname, "www"),
         // controllerDirectory: path.join(__dirname, "www", "controllers"),
-        websiteDirectory: exports.websitePhysicalPath
+        websiteDirectory: exports.websitePhysicalPath,
+        requestProcessorTypes: [out_1.MVCRequestProcessor, ...maishu_node_web_server_1.WebServer.defaultRequestProcessorTypes]
     };
     settings = Object.assign(settings || {}, defaultSettings);
-    let mvcRequestProcessor = new out_1.MVCRequestProcessor();
     let w = new maishu_node_web_server_1.WebServer(settings); //startServer(settings as Settings);
-    w.requestProcessors.unshift(mvcRequestProcessor);
     console.log(`Web server port is ${w.port}.`);
     return w;
 }

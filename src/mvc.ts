@@ -5,25 +5,29 @@ import * as errors from "./errors";
 import { ActionParameterDecoder, metaKeys } from "./attributes";
 import { contentTypes } from "./action-results";
 
-export interface MVCConfig {
+export interface MVCRequestProcessorConfig {
     serverContextData?: any,
-    controllersDirecotry?: VirtualDirectory,
+
+    /** 控制器路径 */
+    controllersPath?: string,
 }
 
-const CONTROLLERS_DIR_NAME = "controllers";
+const CONTROLLERS_PATH = "/controllers";
 
 export class MVCRequestProcessor implements RequestProcessor {
 
     #serverContextData: any;
     #controllerLoaders: { [virtualPath: string]: ControllerLoader } = {};
+    #controllersPath: string;
 
-    constructor(config?: MVCConfig) {
+    constructor(config?: MVCRequestProcessorConfig) {
         config = config || {};
         this.#serverContextData = config.serverContextData || {};
+        this.#controllersPath = config.controllersPath || CONTROLLERS_PATH;
     }
 
     private getControllerLoader(rootDirectory: VirtualDirectory) {
-        let controllersDirecotry = rootDirectory.findDirectory("controlllers");
+        let controllersDirecotry = rootDirectory.findDirectory(this.#controllersPath);
         if (controllersDirecotry == null) {
             return null;
         }
@@ -39,7 +43,7 @@ export class MVCRequestProcessor implements RequestProcessor {
     }
 
     execute(args: RequestContext): Promise<RequestResult> | null {
-        let controllersDirecotry = args.rootDirectory.findDirectory(CONTROLLERS_DIR_NAME);
+        let controllersDirecotry = args.rootDirectory.findDirectory(this.#controllersPath);
         if (controllersDirecotry == null) {
             return null;
         }
@@ -47,7 +51,7 @@ export class MVCRequestProcessor implements RequestProcessor {
         let controllerLoader = this.getControllerLoader(args.rootDirectory);
         if (controllerLoader == null)
             return null;
-            
+
         let actionResult = controllerLoader.findAction(args.virtualPath);
         if (actionResult == null)
             return null;

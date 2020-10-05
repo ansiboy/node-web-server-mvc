@@ -146,6 +146,10 @@ class ControllerLoader {
             throw innerErrors.loadControllerFail(controllerPath, err);
         }
     }
+    /**
+     * 通过指定的虚拟路径获取行为
+     * @param virtualPath 指定的路径
+     */
     findAction(virtualPath) {
         if (!virtualPath)
             throw errors.arugmentNull('virtualPath');
@@ -181,6 +185,10 @@ class ControllerLoader {
             return null;
         console.assert(controller != null);
         return { action, controller, routeData, controllerPhysicalPath };
+    }
+    /** 路由行为 */
+    get routeActions() {
+        return this.#routeActions;
     }
 }
 exports.ControllerLoader = ControllerLoader;

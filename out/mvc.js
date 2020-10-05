@@ -4,17 +4,19 @@ const controller_loader_1 = require("./controller-loader");
 const errors = require("./errors");
 const attributes_1 = require("./attributes");
 const action_results_1 = require("./action-results");
-const CONTROLLERS_DIR_NAME = "controllers";
+const CONTROLLERS_PATH = "/controllers";
 class MVCRequestProcessor {
     constructor(config) {
         this.#controllerLoaders = {};
         config = config || {};
         this.#serverContextData = config.serverContextData || {};
+        this.#controllersPath = config.controllersPath || CONTROLLERS_PATH;
     }
     #serverContextData;
     #controllerLoaders;
+    #controllersPath;
     getControllerLoader(rootDirectory) {
-        let controllersDirecotry = rootDirectory.findDirectory(CONTROLLERS_DIR_NAME);
+        let controllersDirecotry = rootDirectory.findDirectory(this.#controllersPath);
         if (controllersDirecotry == null) {
             return null;
         }
@@ -27,6 +29,10 @@ class MVCRequestProcessor {
         return controllerLoader;
     }
     execute(args) {
+        let controllersDirecotry = args.rootDirectory.findDirectory(this.#controllersPath);
+        if (controllersDirecotry == null) {
+            return null;
+        }
         let controllerLoader = this.getControllerLoader(args.rootDirectory);
         if (controllerLoader == null)
             return null;
@@ -37,25 +43,25 @@ class MVCRequestProcessor {
         context.data = this.#serverContextData;
         return this.executeAction(context, actionResult.controller, actionResult.action, actionResult.routeData)
             .then(r => {
-                let StatusCode = "statusCode";
-                let Headers = "headers";
-                let Content = "content";
-                if (r[Content] != null && (r[StatusCode] != null || r[Headers] != null)) {
-                    return r;
-                }
-                if (typeof r == "string")
-                    return { content: r };
-                return { content: JSON.stringify(r), contentType: action_results_1.contentTypes.applicationJSON };
-            })
-            .then(r => {
-                if (context.logLevel == "all") {
-                    r.headers = r.headers || {};
-                    r.headers["controller-physical-path"] = actionResult?.controllerPhysicalPath || "";
-                    if (typeof actionResult?.action == "function")
-                        r.headers["member-name"] = actionResult?.action.name;
-                }
+            let StatusCode = "statusCode";
+            let Headers = "headers";
+            let Content = "content";
+            if (r[Content] != null && (r[StatusCode] != null || r[Headers] != null)) {
                 return r;
-            });
+            }
+            if (typeof r == "string")
+                return { content: r };
+            return { content: JSON.stringify(r), contentType: action_results_1.contentTypes.applicationJSON };
+        })
+            .then(r => {
+            if (context.logLevel == "all") {
+                r.headers = r.headers || {};
+                r.headers["controller-physical-path"] = actionResult?.controllerPhysicalPath || "";
+                if (typeof actionResult?.action == "function")
+                    r.headers["member-name"] = actionResult?.action.name;
+            }
+            return r;
+        });
     }
     executeAction(context, controller, action, routeData) {
         if (!controller)

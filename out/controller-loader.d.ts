@@ -1,4 +1,5 @@
 import { VirtualDirectory } from "maishu-node-web-server";
+import { ActionInfo } from "./api-controller";
 export declare class ControllerLoader {
     #private;
     constructor(controllersDirectory: VirtualDirectory);
@@ -10,6 +11,10 @@ export declare class ControllerLoader {
     private getControllerPaths;
     private joinPaths;
     private loadController;
+    /**
+     * 通过指定的虚拟路径获取行为
+     * @param virtualPath 指定的路径
+     */
     findAction(virtualPath: string): {
         action: any;
         controller: any;
@@ -18,4 +23,8 @@ export declare class ControllerLoader {
         } | null;
         controllerPhysicalPath: string | undefined;
     } | null;
+    /** 路由行为 */
+    get routeActions(): (ActionInfo & {
+        route: (virtualPath: string) => any;
+    })[];
 }

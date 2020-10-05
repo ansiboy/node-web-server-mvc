@@ -22,7 +22,7 @@ describe("action results", function () {
             yield browser.visit(url);
             let ctr = new home_1.HomeController();
             let r = ctr.content().execute({});
-            assert.equal(browser.source, r.content);
+            assert.strictEqual(browser.source, r.content);
         });
     });
     it("controller physical path header", function () {
@@ -32,7 +32,7 @@ describe("action results", function () {
             let url = `http://127.0.0.1:${webServer.port}${actionPaths_1.actionPaths.home.content}`;
             yield browser.visit(url);
             let h = browser.response.headers.get("controller-physical-path");
-            assert.notEqual(h || "", "");
+            assert.notStrictEqual(h || "", "");
         });
     });
 });

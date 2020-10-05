@@ -12,7 +12,7 @@ describe("action results", function () {
 
         let ctr = new HomeController();
         let r = ctr.content().execute({} as any);
-        assert.equal(browser.source, r.content);
+        assert.strictEqual(browser.source, r.content);
     })
 
     it("controller physical path header", async function () {
@@ -22,6 +22,6 @@ describe("action results", function () {
         await browser.visit(url);
 
         let h = browser.response.headers.get("controller-physical-path");
-        assert.notEqual(h || "", "");
+        assert.notStrictEqual(h || "", "");
     })
 })

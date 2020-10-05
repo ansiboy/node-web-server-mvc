@@ -3,7 +3,8 @@ declare module "zombie" {
         visit(url: string): Promise<void>;
         source: string;
         response: {
-            headers: Headers
+            headers: Headers,
+            status: number
         };
     }
 

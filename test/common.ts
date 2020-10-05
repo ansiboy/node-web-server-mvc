@@ -2,7 +2,7 @@ import Browser = require('zombie');
 import * as fs from "fs";
 import * as path from "path";
 import { MVCRequestProcessor } from "../out";
-import { WebServer, Settings, pathConcat } from "maishu-node-web-server";
+import { WebServer, Settings, pathConcat, } from "maishu-node-web-server";
 
 export let websitePhysicalPath = path.join(__dirname, "www");
 export function createWebserver(settings?: Partial<Settings>) {
@@ -10,14 +10,13 @@ export function createWebserver(settings?: Partial<Settings>) {
         // rootPath: __dirname,
         // staticRootDirectory: path.join(__dirname, "www"),
         // controllerDirectory: path.join(__dirname, "www", "controllers"),
-        websiteDirectory: websitePhysicalPath
+        websiteDirectory: websitePhysicalPath,
+        requestProcessorTypes: [MVCRequestProcessor, ...WebServer.defaultRequestProcessorTypes]
     }
 
     settings = Object.assign(settings || {}, defaultSettings);
 
-    let mvcRequestProcessor = new MVCRequestProcessor();
     let w = new WebServer(settings); //startServer(settings as Settings);
-    w.requestProcessors.unshift(mvcRequestProcessor);
     console.log(`Web server port is ${w.port}.`);
 
     return w;
