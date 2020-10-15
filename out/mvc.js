@@ -10,13 +10,14 @@ class MVCRequestProcessor {
         this.#controllerLoaders = {};
         config = config || {};
         this.#serverContextData = config.serverContextData || {};
-        this.#controllersPath = config.controllersPath || CONTROLLERS_PATH;
+        // this.#controllersPath = config.controllersPath || CONTROLLERS_PATH;
     }
     #serverContextData;
     #controllerLoaders;
-    #controllersPath;
+    #controllersDirectory;
     getControllerLoader(rootDirectory) {
-        let controllersDirecotry = rootDirectory.findDirectory(this.#controllersPath);
+        let controllersDirecotry = typeof this.#controllersDirectory == "string" ?
+            rootDirectory.findDirectory(this.#controllersDirectory) : this.#controllersDirectory;
         if (controllersDirecotry == null) {
             return null;
         }
@@ -29,10 +30,6 @@ class MVCRequestProcessor {
         return controllerLoader;
     }
     execute(args) {
-        let controllersDirecotry = args.rootDirectory.findDirectory(this.#controllersPath);
-        if (controllersDirecotry == null) {
-            return null;
-        }
         let controllerLoader = this.getControllerLoader(args.rootDirectory);
         if (controllerLoader == null)
             return null;

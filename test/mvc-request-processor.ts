@@ -24,7 +24,7 @@ describe("mvc-request-processor", function () {
     it("controllers path", async function () {
 
         let mvcConfig: MVCRequestProcessorConfig = {
-            controllersPath: "my-controllers"
+            controllersDirectory: "my-controllers"
         }
         webServer = createWebserver({
             requestProcessorConfigs: {
@@ -45,7 +45,7 @@ describe("mvc-request-processor", function () {
     it("404", async function () {
 
         let mvcConfig: MVCRequestProcessorConfig = {
-            controllersPath: "my-controllers"
+            controllersDirectory: "my-controllers"
         }
         webServer = createWebserver({
             requestProcessorConfigs: {

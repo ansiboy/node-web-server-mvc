@@ -8,8 +8,10 @@ import { contentTypes } from "./action-results";
 export interface MVCRequestProcessorConfig {
     serverContextData?: any,
 
-    /** 控制器路径 */
-    controllersPath?: string,
+    /** 
+     * 控制器文件夹
+     */
+    controllersDirectory?: string | VirtualDirectory,
 }
 
 const CONTROLLERS_PATH = "/controllers";
@@ -18,16 +20,18 @@ export class MVCRequestProcessor implements RequestProcessor {
 
     #serverContextData: any;
     #controllerLoaders: { [virtualPath: string]: ControllerLoader } = {};
-    #controllersPath: string;
+    #controllersDirectory: string | VirtualDirectory;
 
     constructor(config?: MVCRequestProcessorConfig) {
         config = config || {};
         this.#serverContextData = config.serverContextData || {};
-        this.#controllersPath = config.controllersPath || CONTROLLERS_PATH;
+        // this.#controllersPath = config.controllersPath || CONTROLLERS_PATH;
     }
 
     private getControllerLoader(rootDirectory: VirtualDirectory) {
-        let controllersDirecotry = rootDirectory.findDirectory(this.#controllersPath);
+        let controllersDirecotry: VirtualDirectory | null = typeof this.#controllersDirectory == "string" ?
+            rootDirectory.findDirectory(this.#controllersDirectory) : this.#controllersDirectory;
+
         if (controllersDirecotry == null) {
             return null;
         }
@@ -43,11 +47,6 @@ export class MVCRequestProcessor implements RequestProcessor {
     }
 
     execute(args: RequestContext): Promise<RequestResult> | null {
-        let controllersDirecotry = args.rootDirectory.findDirectory(this.#controllersPath);
-        if (controllersDirecotry == null) {
-            return null;
-        }
-
         let controllerLoader = this.getControllerLoader(args.rootDirectory);
         if (controllerLoader == null)
             return null;

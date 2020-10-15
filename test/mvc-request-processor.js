@@ -28,7 +28,7 @@ describe("mvc-request-processor", function () {
     it("controllers path", function () {
         return __awaiter(this, void 0, void 0, function* () {
             let mvcConfig = {
-                controllersPath: "my-controllers"
+                controllersDirectory: "my-controllers"
             };
             webServer = common_1.createWebserver({
                 requestProcessorConfigs: {
@@ -46,7 +46,7 @@ describe("mvc-request-processor", function () {
     it("404", function () {
         return __awaiter(this, void 0, void 0, function* () {
             let mvcConfig = {
-                controllersPath: "my-controllers"
+                controllersDirectory: "my-controllers"
             };
             webServer = common_1.createWebserver({
                 requestProcessorConfigs: {
