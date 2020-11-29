@@ -25,7 +25,7 @@ export class MVCRequestProcessor implements RequestProcessor {
     constructor(config?: MVCRequestProcessorConfig) {
         config = config || {};
         this.#serverContextData = config.serverContextData || {};
-        // this.#controllersPath = config.controllersPath || CONTROLLERS_PATH;
+        this.#controllersDirectory = config.controllersDirectory || CONTROLLERS_PATH;
     }
 
     private getControllerLoader(rootDirectory: VirtualDirectory) {
@@ -71,7 +71,7 @@ export class MVCRequestProcessor implements RequestProcessor {
                 if (typeof r == "string")
                     return { content: r } as RequestResult;
 
-                return { content: JSON.stringify(r), contentType: contentTypes.applicationJSON } as RequestResult;
+                return { content: JSON.stringify(r), headers: { "Content-Type": contentTypes.applicationJSON } } as RequestResult;
             })
             .then(r => {
                 if (context.logLevel == "all") {

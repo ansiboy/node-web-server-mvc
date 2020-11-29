@@ -10,7 +10,7 @@ class MVCRequestProcessor {
         this.#controllerLoaders = {};
         config = config || {};
         this.#serverContextData = config.serverContextData || {};
-        // this.#controllersPath = config.controllersPath || CONTROLLERS_PATH;
+        this.#controllersDirectory = config.controllersDirectory || CONTROLLERS_PATH;
     }
     #serverContextData;
     #controllerLoaders;
@@ -48,7 +48,7 @@ class MVCRequestProcessor {
             }
             if (typeof r == "string")
                 return { content: r };
-            return { content: JSON.stringify(r), contentType: action_results_1.contentTypes.applicationJSON };
+            return { content: JSON.stringify(r), headers: { "Content-Type": action_results_1.contentTypes.applicationJSON } };
         })
             .then(r => {
             if (context.logLevel == "all") {

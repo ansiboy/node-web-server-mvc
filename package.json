@@ -1,12 +1,12 @@
 {
     "name": "maishu-node-web-server-mvc",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "scripts": {
         "test": "mocha"
     },
     "dependencies": {
         "is-class": "0.0.9",
-        "maishu-node-web-server": "^1.7.2",
+        "maishu-node-web-server": "^1.8.0",
         "reflect-metadata": "^0.1.13",
         "url-pattern": "^1.0.3"
     },
