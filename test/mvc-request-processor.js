@@ -12,7 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("./common");
 const home_1 = require("./www/controllers/home");
 const assert = require("assert");
+const out_1 = require("../out");
 const home_2 = require("./www/my-controllers/home");
+const maishu_node_web_server_1 = require("maishu-node-web-server");
 describe("mvc-request-processor", function () {
     let webServer = common_1.createWebserver();
     let browser = common_1.createBrowser();
@@ -27,14 +29,17 @@ describe("mvc-request-processor", function () {
     });
     it("controllers path", function () {
         return __awaiter(this, void 0, void 0, function* () {
-            let mvcConfig = {
-                controllersDirectory: "my-controllers"
-            };
-            webServer = common_1.createWebserver({
-                requestProcessorConfigs: {
-                    MVC: mvcConfig
-                }
-            });
+            // {
+            //     requestProcessorConfigs: {
+            //         MVC: mvcConfig
+            //     }
+            // }
+            // let mvcConfig: MVCRequestProcessorConfig = {
+            //     controllersDirectory: "my-controllers"
+            // }
+            webServer = common_1.createWebserver();
+            var p = webServer.requestProcessors.filter(o => o instanceof out_1.MVCRequestProcessor)[0];
+            p.controllersDirectory = maishu_node_web_server_1.pathConcat(common_1.websitePhysicalPath, "my-controllers");
             let url = `http://127.0.0.1:${webServer.port}/my-controllers-index`;
             //my-controllers-index
             yield browser.visit(url);
@@ -49,10 +54,11 @@ describe("mvc-request-processor", function () {
                 controllersDirectory: "my-controllers"
             };
             webServer = common_1.createWebserver({
-                requestProcessorConfigs: {
-                    MVC: mvcConfig
-                }
+            // requestProcessorConfigs: {
+            //     MVC: mvcConfig
+            // }
             });
+            var r = webServer.requestProcessors.filter(o => o instanceof out_1.MVCRequestProcessor)[0];
             let url = `http://127.0.0.1:${webServer.port}/tttxxxtttaa`;
             try {
                 yield browser.visit(url);

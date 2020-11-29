@@ -11,7 +11,7 @@ export interface MVCRequestProcessorConfig {
     /** 
      * 控制器文件夹
      */
-    controllersDirectory?: string | VirtualDirectory,
+    controllersDirectory: VirtualDirectory | string,
 }
 
 const CONTROLLERS_PATH = "/controllers";
@@ -20,34 +20,35 @@ export class MVCRequestProcessor implements RequestProcessor {
 
     #serverContextData: any;
     #controllerLoaders: { [virtualPath: string]: ControllerLoader } = {};
-    #controllersDirectory: string | VirtualDirectory;
+    #controllersDirectory: VirtualDirectory | string;
 
-    constructor(config?: MVCRequestProcessorConfig) {
-        config = config || {};
+    constructor(config: MVCRequestProcessorConfig) {
         this.#serverContextData = config.serverContextData || {};
-        this.#controllersDirectory = config.controllersDirectory || CONTROLLERS_PATH;
+        this.#controllersDirectory = config.controllersDirectory;
     }
 
-    private getControllerLoader(rootDirectory: VirtualDirectory) {
-        let controllersDirecotry: VirtualDirectory | null = typeof this.#controllersDirectory == "string" ?
-            rootDirectory.findDirectory(this.#controllersDirectory) : this.#controllersDirectory;
+    get controllersDirectory() {
+        return this.#controllersDirectory;
+    }
+    set controllersDirectory(value) {
+        this.#controllersDirectory = value;
+    }
 
-        if (controllersDirecotry == null) {
-            return null;
-        }
-
-        console.assert(controllersDirecotry.virtualPath != null);
-        let controllerLoader = this.#controllerLoaders[controllersDirecotry.virtualPath];
+    private getControllerLoader() {
+        let controllersDirecotry = typeof this.#controllersDirectory == "string" ?
+            new VirtualDirectory(this.#controllersDirectory) : this.#controllersDirectory;
+        console.assert(controllersDirecotry.physicalPath != null);
+        let controllerLoader = this.#controllerLoaders[controllersDirecotry.physicalPath];
         if (controllerLoader == null) {
             controllerLoader = new ControllerLoader(controllersDirecotry);
-            this.#controllerLoaders[controllersDirecotry.virtualPath] = controllerLoader;
+            this.#controllerLoaders[controllersDirecotry.physicalPath] = controllerLoader;
         }
 
         return controllerLoader;
     }
 
     execute(args: RequestContext): Promise<RequestResult> | null {
-        let controllerLoader = this.getControllerLoader(args.rootDirectory);
+        let controllerLoader = this.getControllerLoader();
         if (controllerLoader == null)
             return null;
 

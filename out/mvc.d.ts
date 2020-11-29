@@ -4,11 +4,13 @@ export interface MVCRequestProcessorConfig {
     /**
      * 控制器文件夹
      */
-    controllersDirectory?: string | VirtualDirectory;
+    controllersDirectory: VirtualDirectory | string;
 }
 export declare class MVCRequestProcessor implements RequestProcessor {
     #private;
-    constructor(config?: MVCRequestProcessorConfig);
+    constructor(config: MVCRequestProcessorConfig);
+    get controllersDirectory(): string | VirtualDirectory;
+    set controllersDirectory(value: string | VirtualDirectory);
     private getControllerLoader;
     execute(args: RequestContext): Promise<RequestResult> | null;
     private executeAction;

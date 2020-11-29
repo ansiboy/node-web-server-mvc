@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const maishu_node_web_server_1 = require("maishu-node-web-server");
 const controller_loader_1 = require("./controller-loader");
 const errors = require("./errors");
 const attributes_1 = require("./attributes");
@@ -8,29 +9,31 @@ const CONTROLLERS_PATH = "/controllers";
 class MVCRequestProcessor {
     constructor(config) {
         this.#controllerLoaders = {};
-        config = config || {};
         this.#serverContextData = config.serverContextData || {};
-        this.#controllersDirectory = config.controllersDirectory || CONTROLLERS_PATH;
+        this.#controllersDirectory = config.controllersDirectory;
     }
     #serverContextData;
     #controllerLoaders;
     #controllersDirectory;
-    getControllerLoader(rootDirectory) {
+    get controllersDirectory() {
+        return this.#controllersDirectory;
+    }
+    set controllersDirectory(value) {
+        this.#controllersDirectory = value;
+    }
+    getControllerLoader() {
         let controllersDirecotry = typeof this.#controllersDirectory == "string" ?
-            rootDirectory.findDirectory(this.#controllersDirectory) : this.#controllersDirectory;
-        if (controllersDirecotry == null) {
-            return null;
-        }
-        console.assert(controllersDirecotry.virtualPath != null);
-        let controllerLoader = this.#controllerLoaders[controllersDirecotry.virtualPath];
+            new maishu_node_web_server_1.VirtualDirectory(this.#controllersDirectory) : this.#controllersDirectory;
+        console.assert(controllersDirecotry.physicalPath != null);
+        let controllerLoader = this.#controllerLoaders[controllersDirecotry.physicalPath];
         if (controllerLoader == null) {
             controllerLoader = new controller_loader_1.ControllerLoader(controllersDirecotry);
-            this.#controllerLoaders[controllersDirecotry.virtualPath] = controllerLoader;
+            this.#controllerLoaders[controllersDirecotry.physicalPath] = controllerLoader;
         }
         return controllerLoader;
     }
     execute(args) {
-        let controllerLoader = this.getControllerLoader(args.rootDirectory);
+        let controllerLoader = this.getControllerLoader();
         if (controllerLoader == null)
             return null;
         let actionResult = controllerLoader.findAction(args.virtualPath);

@@ -103,9 +103,9 @@ export class ControllerLoader {
     }
 
     /**
-   * 获取指定文件夹中（包括子目录），控制器的路径。
-   * @param dir 控制器的文件夹
-   */
+     * 获取指定文件夹中（包括子目录），控制器的路径。
+     * @param dir 控制器的文件夹
+     */
     private getControllerPaths(dir: VirtualDirectory) {
         let controllerPaths: string[] = []
         let filesDic = dir.files();

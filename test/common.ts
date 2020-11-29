@@ -11,13 +11,15 @@ export function createWebserver(settings?: Partial<Settings>) {
         // staticRootDirectory: path.join(__dirname, "www"),
         // controllerDirectory: path.join(__dirname, "www", "controllers"),
         websiteDirectory: websitePhysicalPath,
-        requestProcessorTypes: [MVCRequestProcessor, ...WebServer.defaultRequestProcessorTypes]
+        // requestProcessorTypes: [MVCRequestProcessor, ...WebServer.defaultRequestProcessorTypes]
     }
+
 
     settings = Object.assign(settings || {}, defaultSettings);
 
     let w = new WebServer(settings); //startServer(settings as Settings);
     console.log(`Web server port is ${w.port}.`);
+    w.requestProcessors.unshift(new MVCRequestProcessor({ controllersDirectory: pathConcat(websitePhysicalPath, "controllers") }));
 
     return w;
 }

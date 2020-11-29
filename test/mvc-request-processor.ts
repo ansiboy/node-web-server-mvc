@@ -1,8 +1,9 @@
-import { createWebserver, createBrowser } from "./common";
+import { createWebserver, createBrowser, websitePhysicalPath } from "./common";
 import { HomeController } from "./www/controllers/home";
 import * as assert from "assert";
-import { MVCRequestProcessorConfig, response } from "../out";
+import { MVCRequestProcessor, MVCRequestProcessorConfig, response } from "../out";
 import { HomeController as MyHomeController } from "./www/my-controllers/home";
+import { pathConcat } from "maishu-node-web-server";
 
 describe("mvc-request-processor", function () {
 
@@ -23,15 +24,17 @@ describe("mvc-request-processor", function () {
 
     it("controllers path", async function () {
 
-        let mvcConfig: MVCRequestProcessorConfig = {
-            controllersDirectory: "my-controllers"
-        }
-        webServer = createWebserver({
-            requestProcessorConfigs: {
-                MVC: mvcConfig
-            }
-        });
-
+        // {
+        //     requestProcessorConfigs: {
+        //         MVC: mvcConfig
+        //     }
+        // }
+        // let mvcConfig: MVCRequestProcessorConfig = {
+        //     controllersDirectory: "my-controllers"
+        // }
+        webServer = createWebserver();
+        var p = webServer.requestProcessors.filter(o => o instanceof MVCRequestProcessor)[0] as MVCRequestProcessor;
+        p.controllersDirectory = pathConcat(websitePhysicalPath, "my-controllers");
         let url = `http://127.0.0.1:${webServer.port}/my-controllers-index`;
         //my-controllers-index
         await browser.visit(url);
@@ -48,10 +51,12 @@ describe("mvc-request-processor", function () {
             controllersDirectory: "my-controllers"
         }
         webServer = createWebserver({
-            requestProcessorConfigs: {
-                MVC: mvcConfig
-            }
+            // requestProcessorConfigs: {
+            //     MVC: mvcConfig
+            // }
         });
+
+        var r = webServer.requestProcessors.filter(o => o instanceof MVCRequestProcessor)[0] as MVCRequestProcessor;
 
         let url = `http://127.0.0.1:${webServer.port}/tttxxxtttaa`;
         try {
