@@ -11,6 +11,7 @@ export declare function createAPIControllerType(getActionInfos: () => ActionInfo
             path: ActionPath;
             controller: string;
             action: string;
+            filePath: string;
         }[]>;
         content(value: string, statusCode?: number | undefined): import("./action-results").ContentResult;
         content(value: string, contentType: string, statusCode?: number | undefined): import("./action-results").ContentResult;

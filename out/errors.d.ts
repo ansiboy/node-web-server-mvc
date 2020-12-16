@@ -16,3 +16,4 @@ export declare function requestNotReadable(): Error;
 export declare function connectionClose(): Error;
 export declare function physicalPathNotExists(physicalPath: string): Error;
 export declare function virtualPathConfigError(virtualPath: string, physicalPath: string): Error;
+export declare function actionResultNull(url: string): Error;

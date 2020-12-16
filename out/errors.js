@@ -117,3 +117,10 @@ function virtualPathConfigError(virtualPath, physicalPath) {
     return error;
 }
 exports.virtualPathConfigError = virtualPathConfigError;
+function actionResultNull(url) {
+    let msg = `Action result is null, the url is '${url}'.`;
+    let error = new Error(msg);
+    error.name = actionResultNull.name;
+    return error;
+}
+exports.actionResultNull = actionResultNull;

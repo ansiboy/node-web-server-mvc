@@ -36,17 +36,19 @@ class MVCRequestProcessor {
         let controllerLoader = this.getControllerLoader();
         if (controllerLoader == null)
             return null;
-        let actionResult = controllerLoader.findAction(args.virtualPath);
-        if (actionResult == null)
+        let actionInfo = controllerLoader.findAction(args.virtualPath);
+        if (actionInfo == null)
             return null;
         let context = args;
         context.data = this.#serverContextData;
-        return this.executeAction(context, actionResult.controller, actionResult.action, actionResult.routeData)
+        return this.executeAction(context, actionInfo.controller, actionInfo.action, actionInfo.routeData)
             .then(r => {
             let StatusCode = "statusCode";
             let Headers = "headers";
             let Content = "content";
-            if (r[Content] != null && (r[StatusCode] != null || r[Headers] != null)) {
+            // if (r == null)
+            //     return Promise.reject(errors.actionResultNull(context.req.url || ""));
+            if (r != null && r[Content] != null && (r[StatusCode] != null || r[Headers] != null)) {
                 return r;
             }
             if (typeof r == "string")
@@ -56,9 +58,9 @@ class MVCRequestProcessor {
             .then(r => {
             if (context.logLevel == "all") {
                 r.headers = r.headers || {};
-                r.headers["controller-physical-path"] = actionResult?.controllerPhysicalPath || "";
-                if (typeof actionResult?.action == "function")
-                    r.headers["member-name"] = actionResult?.action.name;
+                r.headers["controller-physical-path"] = actionInfo?.controllerPhysicalPath || "";
+                if (typeof actionInfo?.action == "function")
+                    r.headers["member-name"] = actionInfo?.action.name;
             }
             return r;
         });

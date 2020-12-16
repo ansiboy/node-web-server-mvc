@@ -164,8 +164,8 @@ exports.routeData = (function () {
     });
 })();
 exports.formData = exports.routeData;
-exports.request = createParameterDecorator(async (req) => {
-    return req;
+exports.request = createParameterDecorator(async (context) => {
+    return context.req;
 });
 exports.response = createParameterDecorator(async (context) => {
     return context.res;
