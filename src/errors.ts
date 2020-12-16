@@ -119,3 +119,9 @@ export function virtualPathConfigError(virtualPath: string, physicalPath: string
     return error;
 }
 
+export function actionResultNull(url: string) {
+    let msg = `Action result is null, the url is '${url}'.`;
+    let error = new Error(msg);
+    error.name = actionResultNull.name;
+    return error;
+}

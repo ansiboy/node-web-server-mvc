@@ -208,25 +208,25 @@ export let routeData = (function () {
 export let formData = routeData;
 
 export let request = createParameterDecorator(
-    async (req) => {
-        return req;
+    async (context): Promise<http.IncomingMessage> => {
+        return context.req;
     }
 )
 
 export let response = createParameterDecorator(
-    async (context) => {
+    async (context): Promise<http.ServerResponse> => {
         return context.res;
     }
 )
 
 export let requestHeaders = createParameterDecorator(
-    async (context) => {
+    async (context): Promise<http.IncomingHttpHeaders> => {
         return context.req.headers;
     }
 )
 
 export let serverContext = createParameterDecorator(
-    async (context: MVCRequestContext) => {
+    async (context: MVCRequestContext): Promise<MVCRequestContext> => {
         return context;
     }
 )

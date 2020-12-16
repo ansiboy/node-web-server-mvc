@@ -52,20 +52,22 @@ export class MVCRequestProcessor implements RequestProcessor {
         if (controllerLoader == null)
             return null;
 
-        let actionResult = controllerLoader.findAction(args.virtualPath);
-        if (actionResult == null)
+        let actionInfo = controllerLoader.findAction(args.virtualPath);
+        if (actionInfo == null)
             return null;
 
         let context = args as MVCRequestContext;
         context.data = this.#serverContextData;
-        return this.executeAction(context, actionResult.controller, actionResult.action,
-            actionResult.routeData)
+        return this.executeAction(context, actionInfo.controller, actionInfo.action,
+            actionInfo.routeData)
             .then(r => {
                 let StatusCode: keyof RequestResult = "statusCode";
                 let Headers: keyof RequestResult = "headers";
                 let Content: keyof RequestResult = "content";
 
-                if (r[Content] != null && (r[StatusCode] != null || r[Headers] != null)) {
+                // if (r == null)
+                //     return Promise.reject(errors.actionResultNull(context.req.url || ""));
+                if (r != null && r[Content] != null && (r[StatusCode] != null || r[Headers] != null)) {
                     return r as RequestResult;
                 }
 
@@ -77,9 +79,9 @@ export class MVCRequestProcessor implements RequestProcessor {
             .then(r => {
                 if (context.logLevel == "all") {
                     r.headers = r.headers || {};
-                    r.headers["controller-physical-path"] = actionResult?.controllerPhysicalPath || "";
-                    if (typeof actionResult?.action == "function")
-                        r.headers["member-name"] = (actionResult?.action as Function).name;
+                    r.headers["controller-physical-path"] = actionInfo?.controllerPhysicalPath || "";
+                    if (typeof actionInfo?.action == "function")
+                        r.headers["member-name"] = (actionInfo?.action as Function).name;
                 }
                 return r;
             })
