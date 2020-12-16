@@ -15,6 +15,7 @@ export function createAPIControllerType(getActionInfos: () => ActionInfo[], serv
                 path: o.actionPath,
                 controller: o.controllerType.name,
                 action: o.memberName,
+                filePath: o.controllerPhysicalPath,
             }))
 
             return r;
