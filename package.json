@@ -1,13 +1,13 @@
 {
-    "name": "maishu-node-web-server-mvc",
-    "version": "1.2.2",
+    "name": "maishu-nws-mvc",
+    "version": "1.2.3",
     "scripts": {
         "test": "mocha",
         "build": "tsc -p src"
     },
     "dependencies": {
         "is-class": "0.0.9",
-        "maishu-node-web-server": "^1.8.0",
+        "maishu-node-web-server": "^1.9.5",
         "reflect-metadata": "^0.1.13",
         "url-pattern": "^1.0.3"
     },
