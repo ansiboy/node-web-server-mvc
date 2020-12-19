@@ -33,7 +33,7 @@ describe("mvc-request-processor", function () {
         //     controllersDirectory: "my-controllers"
         // }
         webServer = createWebserver();
-        var p = webServer.requestProcessors.filter(o => o instanceof MVCRequestProcessor)[0] as MVCRequestProcessor;
+        var p = webServer.requestProcessors.find(MVCRequestProcessor);
         p.controllersDirectory = pathConcat(websitePhysicalPath, "my-controllers");
         let url = `http://127.0.0.1:${webServer.port}/my-controllers-index`;
         //my-controllers-index
@@ -56,7 +56,7 @@ describe("mvc-request-processor", function () {
             // }
         });
 
-        var r = webServer.requestProcessors.filter(o => o instanceof MVCRequestProcessor)[0] as MVCRequestProcessor;
+        var r = webServer.requestProcessors.find(MVCRequestProcessor);
 
         let url = `http://127.0.0.1:${webServer.port}/tttxxxtttaa`;
         try {
