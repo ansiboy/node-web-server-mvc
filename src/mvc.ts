@@ -1,4 +1,4 @@
-import { RequestProcessor, RequestContext, RequestResult, VirtualDirectory } from "maishu-node-web-server";
+import { RequestProcessor, RequestContext, RequestResult, VirtualDirectory, processorPriorities } from "maishu-node-web-server";
 import { ControllerLoader } from "./controller-loader";
 import { MVCRequestContext } from "./types";
 import * as errors from "./errors";
@@ -17,6 +17,10 @@ export interface MVCRequestProcessorConfig {
 const CONTROLLERS_PATH = "/controllers";
 
 export class MVCRequestProcessor implements RequestProcessor {
+
+    private static priority = processorPriorities.ProxyRequestProcessor + 1
+
+    priority = MVCRequestProcessor.priority;
 
     #serverContextData: any;
     #controllerLoaders: { [virtualPath: string]: ControllerLoader } = {};
