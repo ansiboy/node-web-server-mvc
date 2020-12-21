@@ -2,19 +2,16 @@ import { RequestProcessor, RequestContext, RequestResult, VirtualDirectory, proc
 import { ControllerLoader } from "./controller-loader";
 import { MVCRequestContext } from "./types";
 import * as errors from "./errors";
-import { ActionParameterDecoder, metaKeys } from "./attributes";
+import { action, ActionParameterDecoder, controller, metaKeys } from "./attributes";
 import { contentTypes } from "./action-results";
 
 export interface MVCRequestProcessorConfig {
     serverContextData?: any,
-
     /** 
      * 控制器文件夹
      */
     controllersDirectory: VirtualDirectory | string,
 }
-
-const CONTROLLERS_PATH = "/controllers";
 
 export class MVCRequestProcessor implements RequestProcessor {
 
@@ -41,6 +38,7 @@ export class MVCRequestProcessor implements RequestProcessor {
     private getControllerLoader() {
         let controllersDirecotry = typeof this.#controllersDirectory == "string" ?
             new VirtualDirectory(this.#controllersDirectory) : this.#controllersDirectory;
+
         console.assert(controllersDirecotry.physicalPath != null);
         let controllerLoader = this.#controllerLoaders[controllersDirecotry.physicalPath];
         if (controllerLoader == null) {
@@ -99,14 +97,7 @@ export class MVCRequestProcessor implements RequestProcessor {
         if (!action)
             throw errors.arugmentNull("action")
 
-        // if (!req)
-        //     throw errors.arugmentNull("req");
-
-        // if (!res)
-        //     throw errors.arugmentNull("res");
-
         routeData = routeData || {};
-
         let parameterDecoders: (ActionParameterDecoder<any>)[] = [];
         parameterDecoders = Reflect.getMetadata(metaKeys.parameter, controller, action.name) || [];
         parameterDecoders.sort((a, b) => a.parameterIndex < b.parameterIndex ? -1 : 1);
@@ -127,5 +118,31 @@ export class MVCRequestProcessor implements RequestProcessor {
                 }
             }
         })
+    }
+}
+
+function __decorate(decorators: any[], target: any, key?: any, desc?: any) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+        r = Reflect.decorate(decorators, target, key, desc);
+    else
+        for (var i = decorators.length - 1; i >= 0; i--)
+            if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+
+export function register<T>(type: { new(...args: any[]): T }, actions: { [key: string]: string }): void
+export function register<T>(type: { new(...args: any[]): T }, controllerName: string, actions: { [key: string]: string }): void
+export function register<T>(type: { new(...args: any[]): T }, arg1: any, actions?: { [key: string]: string }): void {
+
+    let controllerName: string | undefined = undefined;
+    if (typeof arg1 == "string")
+        controllerName = arg1;
+
+    __decorate([controller(controllerName)], type);
+    actions = actions || {};
+    for (let key in actions) {
+        __decorate([action(actions[key] || key)], type.prototype, key);
     }
 }

@@ -26,6 +26,7 @@ export interface ActionParameterDecoder<T> {
 export let CONTROLLER_REGISTER = "$register";
 export let CONTROLLER_PHYSICAL_PATH = "$physical_path";
 export type RegisterCotnroller = (controllerInfos: ControllerInfo[], controllerPhysicalPath: string) => void;
+
 /**
  * 标记一个类是否为控制器
  * @param path 路径
@@ -53,7 +54,7 @@ export function controller<T extends { new(...args: any[]): any }>(path?: string
  */
 export function action(...paths: ActionPath[]) {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-        let memberName = descriptor.value.name
+        let memberName = propertyKey;//descriptor.value.name
         let obj: ActionInfo = { memberName, paths }
         let controllerType = target.constructor
         let actionDefine = Reflect.getMetadata(metaKeys.action, controllerType, propertyKey)
