@@ -1,13 +1,13 @@
 {
     "name": "maishu-nws-mvc",
-    "version": "1.2.3",
+    "version": "1.2.6",
     "scripts": {
         "test": "mocha",
         "build": "tsc -p src"
     },
     "dependencies": {
         "is-class": "0.0.9",
-        "maishu-node-web-server": "^1.9.5",
+        "maishu-node-web-server": "^1.9.7",
         "reflect-metadata": "^0.1.13",
         "url-pattern": "^1.0.3"
     },
@@ -17,6 +17,9 @@
         "mocha": "^8.1.3",
         "zombie": "^6.1.4"
     },
-    "main": "./out/index",
-    "types": "./out/index.d.ts"
+    "main": "./out/index.js",
+    "types": "./out/index.d.ts",
+    "files": [
+        "out"
+    ]
 }
