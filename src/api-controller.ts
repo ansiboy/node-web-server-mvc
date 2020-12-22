@@ -1,6 +1,7 @@
 import { Controller } from "./controller";
-import { register } from "./attributes";
+import { controller, register } from "./attributes";
 import { ControllerType, ActionPath, ControllerInfo } from "./types";
+import { pathConcat } from "maishu-node-web-server";
 
 export type ActionInfo = {
     controllerType: ControllerType<any>, memberName: string, actionPath: ActionPath,
@@ -21,7 +22,6 @@ export function createAPIControllerType(getActionInfos: () => ActionInfo[], serv
             return r;
         }
     }
-    register(APIControllerType, serverContext, __filename).action("list", ["/api/action/list"]);
+    return register(APIControllerType, serverContext, pathConcat(__filename, ""), { "list": ["/api/action/list"] });
 
-    return APIControllerType;
 }

@@ -1,4 +1,4 @@
-import { VirtualDirectory } from "maishu-node-web-server";
+import { pathConcat, VirtualDirectory } from "maishu-node-web-server";
 import * as errors from './errors';
 import isClass = require('is-class');
 import { CONTROLLER_REGISTER, controller } from "./attributes";
@@ -10,6 +10,7 @@ import * as path from "path";
 import UrlPattern = require("url-pattern");
 import { isRouteString } from "./router";
 import { watch } from "fs";
+import { Func } from "mocha";
 
 export class ControllerLoader {
 
@@ -49,7 +50,7 @@ export class ControllerLoader {
         //=============================================
         // 注册内置的控制器
 
-        createAPIControllerType(() => {
+        let controllerInfo = createAPIControllerType(() => {
             let actionInfos: ActionInfo[] = [
                 ...Object.getOwnPropertyNames(this.#pathActions).map(name => this.#pathActions[name]),
                 ...this.#routeActions
@@ -57,55 +58,27 @@ export class ControllerLoader {
 
             return actionInfos;
         }, this.#controllerDefines);
+        this.loadActionInfos(controllerInfo);
         //==============================================
 
         console.assert(this.#controllerDefines != null);
-        this.#controllerDefines.forEach(c => {
-            console.assert((c.path || '') != '')
-            c.actionDefines.forEach(a => {
-
-                let actionPaths = a.paths || []
-                if (actionPaths.length == 0) {
-                    actionPaths.push(this.joinPaths(c.path, a.memberName))
-                }
-                for (let i = 0; i < actionPaths.length; i++) {
-                    let actionPath = actionPaths[i];
-                    if (typeof actionPath == "string" && actionPath[0] != '/') {
-                        actionPath = this.joinPaths(c.path, actionPath)
-                    }
-
-                    if (typeof actionPath == "function") {
-                        this.#routeActions.push({
-                            route: actionPath, controllerType: c.type, memberName: a.memberName,
-                            actionPath: actionPath, controllerPhysicalPath: c.physicalPath
-                        });
-                    }
-                    else {
-                        if (isRouteString(actionPath)) {
-                            let p = new UrlPattern(actionPath);
-                            let route = (virtualPath: string) => {
-                                return p.match(virtualPath);
-                            };
-                            this.#routeActions.push({
-                                route, controllerType: c.type, memberName: a.memberName,
-                                actionPath, controllerPhysicalPath: c.physicalPath
-                            });
-                        }
-                        else {
-                            this.#pathActions[actionPath] = {
-                                controllerType: c.type, memberName: a.memberName,
-                                actionPath, controllerPhysicalPath: c.physicalPath
-                            }
-
-                        }
-                    }
-                }
-            })
-        })
     }
 
     private watchFile(physicalPath: string) {
         watch(physicalPath).on("change", (eventType, file) => {
+            //===============================================================
+            // clear controller
+            delete require.cache[require.resolve(physicalPath)];
+            for (let key in this.#pathActions) {
+                if (this.#pathActions[key].controllerPhysicalPath == physicalPath)
+                    delete this.#pathActions[key];
+            }
+
+            for (let key in this.#routeActions) {
+                if (this.#routeActions[key].controllerPhysicalPath == physicalPath)
+                    delete this.#routeActions[key];
+            }
+            //===============================================================
             this.loadController(physicalPath);
         })
     }
@@ -138,7 +111,7 @@ export class ControllerLoader {
 
     private loadController(controllerPath: string): void {
         try {
-            let mod = require(controllerPath);
+            var mod = require(controllerPath);
             console.assert(mod != null);
             let propertyNames = Object.getOwnPropertyNames(mod)
             for (let i = 0; i < propertyNames.length; i++) {
@@ -147,28 +120,67 @@ export class ControllerLoader {
                     continue
                 }
 
+                let controllerInfo: ControllerInfo | null = null;
                 let func: RegisterCotnroller = ctrlType.prototype[CONTROLLER_REGISTER];
-                if (func != null) {
-                    func(this.#controllerDefines, controllerPath);
+                if (func == null) {
                     continue;
                 }
 
-                //TODO: 检查控制器是否重复
-                // console.assert(this.#controllerDefines != null)
-                // let controllerDefine = this.#controllerDefines.filter(o => o.type == ctrlType)[0]
-
-                // 判断类型使用 ctrlType.prototype instanceof Controller 不可靠
-                if (ctrlType["typeName"] == Controller.typeName) {//controllerDefine == null && 
-                    controller(ctrlType.name)(ctrlType);
-                    let func: RegisterCotnroller = ctrlType.prototype[CONTROLLER_REGISTER];
-                    func(this.#controllerDefines, controllerPath);
-                }
+                controllerInfo = func(this.#controllerDefines, controllerPath);
+                console.assert(controllerInfo != null);
+                // if (controllerInfo != null) {
+                let c = controllerInfo;
+                console.assert((c.path || '') != '')
+                this.loadActionInfos(c);
+                // }
             }
         }
         catch (err) {
             console.error(err)
             throw innerErrors.loadControllerFail(controllerPath, err)
         }
+    }
+
+    private loadActionInfos(c: ControllerInfo) {
+        c.actionDefines.forEach(a => {
+
+            let actionPaths = a.paths || []
+            if (actionPaths.length == 0) {
+                actionPaths.push(this.joinPaths(c.path, a.memberName))
+            }
+            for (let i = 0; i < actionPaths.length; i++) {
+                let actionPath = actionPaths[i];
+                if (typeof actionPath == "string" && actionPath[0] != '/') {
+                    actionPath = this.joinPaths(c.path, actionPath)
+                }
+
+                if (typeof actionPath == "function") {
+                    this.#routeActions.push({
+                        route: actionPath, controllerType: c.type, memberName: a.memberName,
+                        actionPath: actionPath, controllerPhysicalPath: c.physicalPath
+                    });
+                }
+                else {
+                    if (isRouteString(actionPath)) {
+                        let p = new UrlPattern(actionPath);
+                        let route = (virtualPath: string) => {
+                            return p.match(virtualPath);
+                        };
+                        this.#routeActions.push({
+                            route, controllerType: c.type, memberName: a.memberName,
+                            actionPath, controllerPhysicalPath: c.physicalPath
+                        });
+                    }
+                    else {
+                        this.#pathActions[actionPath] = {
+                            controllerType: c.type, memberName: a.memberName,
+                            actionPath, controllerPhysicalPath: c.physicalPath
+                        }
+
+                    }
+                }
+            }
+        })
     }
 
     /** 

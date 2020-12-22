@@ -25,7 +25,7 @@ export interface ActionParameterDecoder<T> {
 
 export let CONTROLLER_REGISTER = "$register";
 export let CONTROLLER_PHYSICAL_PATH = "$physical_path";
-export type RegisterCotnroller = (controllerInfos: ControllerInfo[], controllerPhysicalPath: string) => void;
+export type RegisterCotnroller = (controllerInfos: ControllerInfo[], controllerPhysicalPath: string) => ControllerInfo;
 
 /**
  * 标记一个类是否为控制器
@@ -42,6 +42,8 @@ export function controller<T extends { new(...args: any[]): any }>(path?: string
                     registerAction(controllerInfo, metadata.memberName, metadata.paths, controllerPhysicalPath)
                 }
             }
+
+            return controllerInfo;
         }
         constructor.prototype[CONTROLLER_REGISTER] = func;
     }
@@ -65,16 +67,17 @@ export function action(...paths: ActionPath[]) {
     };
 }
 
-export function register<T>(type: ControllerType<T>, serverContext: ControllerInfo[], controllerPhysicalPath: string, path?: string) {
-    let controllerDefine = registerController(type, serverContext, controllerPhysicalPath, path)
-    let obj = {
-        action(member: keyof T, paths?: string[]) {
-            registerAction(controllerDefine, member, paths || [], controllerPhysicalPath)
-            return obj
-        }
+export function register<T>(type: ControllerType<T>, serverContext: ControllerInfo[], controllerPhysicalPath: string,
+    actions: { [member: string]: string | string[] }, path?: string) {
+    controller(path)(type);
+    let controllerInfo = registerController(type, serverContext, controllerPhysicalPath, path);
+    for (let member in actions) {
+        let path = actions[member]
+        let actionPaths: string[] = typeof path == "string" ? [path] : path;
+        registerAction(controllerInfo, member, actionPaths, controllerPhysicalPath)
     }
 
-    return obj
+    return controllerInfo;
 }
 
 function registerController<T>(type: ControllerType<T>, controllerDefines: ControllerInfo[], controllerPhysicalPath: string, path?: string) {
