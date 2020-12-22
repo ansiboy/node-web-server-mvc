@@ -86,10 +86,11 @@ function registerController<T>(type: ControllerType<T>, controllerDefines: Contr
     if (path && path[0] != '/')
         path = '/' + path
 
-    // serverContext.controllerDefines = serverContext.controllerDefines || [];
     let controllerDefine = controllerDefines.filter(o => o.type == type)[0]
-    if (controllerDefine != null)
-        throw errors.controlRegister(type)
+    if (controllerDefine != null) {
+        let index = controllerDefines.indexOf(controllerDefine);
+        controllerDefines.splice(index, 1);
+    }
 
     controllerDefine = { type: type, actionDefines: [], path, physicalPath: controllerPhysicalPath };
     controllerDefines.push(controllerDefine)
@@ -157,7 +158,7 @@ export let routeData = (function () {
     }
 
     /**
-     * 
+     *
      * @param request 获取 QueryString 里的对象
      */
     function getQueryObject(request: http.IncomingMessage): { [key: string]: any } {

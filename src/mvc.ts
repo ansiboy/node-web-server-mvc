@@ -39,11 +39,10 @@ export class MVCRequestProcessor implements RequestProcessor {
         let controllersDirecotry = typeof this.#controllersDirectory == "string" ?
             new VirtualDirectory(this.#controllersDirectory) : this.#controllersDirectory;
 
-        console.assert(controllersDirecotry.physicalPath != null);
-        let controllerLoader = this.#controllerLoaders[controllersDirecotry.physicalPath];
+        let controllerLoader = this.#controllerLoaders[controllersDirecotry.virtualPath];
         if (controllerLoader == null) {
             controllerLoader = new ControllerLoader(controllersDirecotry);
-            this.#controllerLoaders[controllersDirecotry.physicalPath] = controllerLoader;
+            this.#controllerLoaders[controllersDirecotry.virtualPath] = controllerLoader;
         }
 
         return controllerLoader;

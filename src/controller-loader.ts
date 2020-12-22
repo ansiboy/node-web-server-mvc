@@ -9,6 +9,7 @@ import { RegisterCotnroller } from "./attributes";
 import * as path from "path";
 import UrlPattern = require("url-pattern");
 import { isRouteString } from "./router";
+import { watch } from "fs";
 
 export class ControllerLoader {
 
@@ -42,6 +43,7 @@ export class ControllerLoader {
 
         controllerPaths.forEach(c => {
             this.loadController(c);
+            this.watchFile(c);
         })
 
         //=============================================
@@ -102,6 +104,12 @@ export class ControllerLoader {
         })
     }
 
+    private watchFile(physicalPath: string) {
+        watch(physicalPath).on("change", (eventType, file) => {
+            this.loadController(physicalPath);
+        })
+    }
+
     /**
      * 获取指定文件夹中（包括子目录），控制器的路径。
      * @param dir 控制器的文件夹
@@ -113,7 +121,7 @@ export class ControllerLoader {
         files.forEach(p => {
             if (p.endsWith('.js')) {
                 // 去掉 .js 后缀
-                controllerPaths.push(p.substring(0, p.length - 3))
+                controllerPaths.push(p);//.substring(0, p.length - 3)
             }
         })
         return controllerPaths
@@ -146,11 +154,11 @@ export class ControllerLoader {
                 }
 
                 //TODO: 检查控制器是否重复
-                console.assert(this.#controllerDefines != null)
-                let controllerDefine = this.#controllerDefines.filter(o => o.type == ctrlType)[0]
+                // console.assert(this.#controllerDefines != null)
+                // let controllerDefine = this.#controllerDefines.filter(o => o.type == ctrlType)[0]
 
                 // 判断类型使用 ctrlType.prototype instanceof Controller 不可靠
-                if (controllerDefine == null && ctrlType["typeName"] == Controller.typeName) {
+                if (ctrlType["typeName"] == Controller.typeName) {//controllerDefine == null && 
                     controller(ctrlType.name)(ctrlType);
                     let func: RegisterCotnroller = ctrlType.prototype[CONTROLLER_REGISTER];
                     func(this.#controllerDefines, controllerPath);
