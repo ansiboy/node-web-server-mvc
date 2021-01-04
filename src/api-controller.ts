@@ -22,6 +22,6 @@ export function createAPIControllerType(getActionInfos: () => ActionInfo[], serv
             return r;
         }
     }
-    return register(APIControllerType, serverContext, pathConcat(__filename, ""), { "list": ["/api/action/list"] });
+    return register(APIControllerType, serverContext, pathConcat(__filename, ""), { "list": ["/api/action/list", "/nws/actions"] });
 
 }
