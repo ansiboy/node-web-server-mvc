@@ -9,8 +9,8 @@ import { RegisterCotnroller } from "./attributes";
 import * as path from "path";
 import UrlPattern = require("url-pattern");
 import { isRouteString } from "./router";
-import { watch } from "fs";
-import { Func } from "mocha";
+import * as fs from "fs";
+
 
 export class ControllerLoader {
 
@@ -25,8 +25,29 @@ export class ControllerLoader {
         if (controllersDirectory == null)
             throw errors.arugmentNull("controllersDirectory");
 
+        if (!fs.existsSync(controllersDirectory.physicalPath))
+            throw errors.physicalPathNotExists(controllersDirectory.physicalPath);
+
         this.#controllersDirectory = controllersDirectory;
         this.load();
+
+        let dirPath = controllersDirectory.physicalPath;
+        fs.watch(dirPath).on("change", (event, filePath) => {
+            if (typeof filePath !== "string")
+                return;
+
+            if (!path.isAbsolute(filePath))
+                filePath = path.join(dirPath, filePath);
+
+            // if (!fs.existsSync(filePath))
+            //     return;
+
+            // let stat = fs.statSync(filePath);
+            // if (stat.isFile() == false)
+            //     return;
+
+            this.onFileOrDirChanged(filePath);
+        })
     }
 
     private load() {
@@ -44,7 +65,7 @@ export class ControllerLoader {
 
         controllerPaths.forEach(c => {
             this.loadController(c);
-            this.watchFile(c);
+            // this.watchFile(c);
         })
 
         //=============================================
@@ -64,23 +85,27 @@ export class ControllerLoader {
         console.assert(this.#controllerDefines != null);
     }
 
-    private watchFile(physicalPath: string) {
-        watch(physicalPath).on("change", (eventType, file) => {
-            //===============================================================
-            // clear controller
-            delete require.cache[require.resolve(physicalPath)];
-            for (let key in this.#pathActions) {
-                if (this.#pathActions[key].controllerPhysicalPath == physicalPath)
-                    delete this.#pathActions[key];
-            }
+    private onFileOrDirChanged(physicalPath: string) {
+        // fs.watch(physicalPath).on("change", (eventType, file) => {
+        //===============================================================
+        // clear controller
+        delete require.cache[require.resolve(physicalPath)];
+        for (let key in this.#pathActions) {
+            if (this.#pathActions[key].controllerPhysicalPath == physicalPath)
+                delete this.#pathActions[key];
+        }
 
-            for (let key in this.#routeActions) {
-                if (this.#routeActions[key].controllerPhysicalPath == physicalPath)
-                    delete this.#routeActions[key];
-            }
-            //===============================================================
-            this.loadController(physicalPath);
-        })
+        for (let key in this.#routeActions) {
+            if (this.#routeActions[key].controllerPhysicalPath == physicalPath)
+                delete this.#routeActions[key];
+        }
+        //===============================================================
+        if (fs.existsSync(physicalPath)) {
+            let stat = fs.statSync(physicalPath);
+            if (stat.isFile())
+                this.loadController(physicalPath);
+        }
+        // })
     }
 
     /**
