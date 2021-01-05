@@ -2,7 +2,7 @@ import http = require('http');
 import { arugmentNull } from './errors';
 import url = require('url');
 import * as errors from "./errors";
-import { RequestProcessor, RequestContext, RequestResult } from 'maishu-node-web-server';
+import { RequestContext, RequestResult } from 'maishu-node-web-server';
 
 const encoding = 'UTF-8'
 export const contentTypes = {

@@ -17,17 +17,17 @@ export default function (webServer: WebServer) {
     let mvcProcessor = new MVCRequestProcessor();
     mvcProcessor.controllerDirectories = [];
     webServer.requestProcessors.add(mvcProcessor);
-    let dir = webServer.websiteDirectory.findDirectory("controllers");
-    if (dir) {
-        mvcProcessor.controllerDirectories.push(dir.physicalPath);
-    }
+    // let dir = webServer.websiteDirectory.findDirectory("controllers");
+    // if (dir) {
+    //     mvcProcessor.controllerDirectories.push(dir.physicalPath);
+    // }
 
-    let staticFileProcessor = webServer.requestProcessors.find(StaticFileProcessor);
-    if (staticFileProcessor) {
-        if (webServer.websiteDirectory.findDirectory("static"))
-            staticFileProcessor.staticPath = "static";
-        else
-            staticFileProcessor.staticPath = "public";
-    }
+    // let staticFileProcessor = webServer.requestProcessors.find(StaticFileProcessor);
+    // if (staticFileProcessor) {
+    //     if (webServer.websiteDirectory.findDirectory("static"))
+    //         staticFileProcessor.staticPath = "static";
+    //     else
+    //         staticFileProcessor.staticPath = "public";
+    // }
 
 }

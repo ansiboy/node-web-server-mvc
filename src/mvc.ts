@@ -42,15 +42,20 @@ export class MVCRequestProcessor implements RequestProcessor<Options> {
         this.options.contextData = value;
     }
 
-    private getControllerLoaders() {
+    private getControllerLoaders(rootDir: VirtualDirectory) {
 
-        let controllerDirectories = this.controllerDirectories || [];
+        let controllerDirectories = (this.controllerDirectories || []).map(o => new VirtualDirectory(o));
+        let defaultDir = rootDir.findDirectory("controllers");
+        if (controllerDirectories.length == 0 && defaultDir != null) {
+            controllerDirectories.push(defaultDir);
+        }
+
         for (let i in controllerDirectories) {
-            let physicalPath = controllerDirectories[i];
+            let physicalPath = controllerDirectories[i].physicalPath;
             if (this.#controllerLoaders[physicalPath] != null)
                 continue;
 
-            var dir = new VirtualDirectory(physicalPath);
+            var dir = controllerDirectories[i];
             this.#controllerLoaders[physicalPath] = new ControllerLoader(dir);
         }
 
@@ -58,7 +63,7 @@ export class MVCRequestProcessor implements RequestProcessor<Options> {
     }
 
     execute(args: RequestContext): Promise<RequestResult> | null {
-        let controllerLoaders = this.getControllerLoaders();
+        let controllerLoaders = this.getControllerLoaders(args.rootDirectory);
         if (controllerLoaders == null)
             return null;
 
