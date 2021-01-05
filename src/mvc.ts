@@ -5,62 +5,77 @@ import * as errors from "./errors";
 import { action, ActionParameterDecoder, controller, metaKeys } from "./attributes";
 import { contentTypes } from "./action-results";
 
-export interface MVCRequestProcessorConfig {
-    serverContextData?: any,
-    /** 
-     * 控制器文件夹
-     */
-    controllersDirectory: VirtualDirectory | string,
+interface Options {
+    controllersDirectories?: string[],
+    contextData?: any,
 }
 
-export class MVCRequestProcessor implements RequestProcessor {
+export class MVCRequestProcessor implements RequestProcessor<Options> {
 
     private static priority = processorPriorities.ProxyRequestProcessor + 1
 
     priority = MVCRequestProcessor.priority;
 
-    #serverContextData: any;
+    // #serverContextData: any;
     #controllerLoaders: { [virtualPath: string]: ControllerLoader } = {};
-    #controllersDirectory: VirtualDirectory | string;
+    // #controllersDirectories: string[] = [];
 
-    constructor(config: MVCRequestProcessorConfig) {
-        this.#serverContextData = config.serverContextData || {};
-        this.#controllersDirectory = config.controllersDirectory;
+    options: Options = {};
+
+    constructor() {
     }
 
-    get controllersDirectory() {
-        return this.#controllersDirectory;
-    }
-    set controllersDirectory(value) {
-        this.#controllersDirectory = value;
+    /** 获取控制器文件夹物理路径 */
+    get controllerDirectories() {
+        return this.options.controllersDirectories;
     }
 
-    private getControllerLoader() {
-        let controllersDirecotry = typeof this.#controllersDirectory == "string" ?
-            new VirtualDirectory(this.#controllersDirectory) : this.#controllersDirectory;
+    /** 设置控制器文件夹物理路径 */
+    set controllerDirectories(value) {
+        this.options.controllersDirectories = value;
+    }
 
-        let controllerLoader = this.#controllerLoaders[controllersDirecotry.virtualPath];
-        if (controllerLoader == null) {
-            controllerLoader = new ControllerLoader(controllersDirecotry);
-            this.#controllerLoaders[controllersDirecotry.virtualPath] = controllerLoader;
+    get contextData() {
+        return this.options.contextData;
+    }
+    set contextData(value: any) {
+        this.options.contextData = value;
+    }
+
+    private getControllerLoaders() {
+
+        let controllerDirectories = this.controllerDirectories || [];
+        for (let i in controllerDirectories) {
+            let physicalPath = controllerDirectories[i];
+            if (this.#controllerLoaders[physicalPath] != null)
+                continue;
+
+            var dir = new VirtualDirectory(physicalPath);
+            this.#controllerLoaders[physicalPath] = new ControllerLoader(dir);
         }
 
-        return controllerLoader;
+        return this.#controllerLoaders;
     }
 
     execute(args: RequestContext): Promise<RequestResult> | null {
-        let controllerLoader = this.getControllerLoader();
-        if (controllerLoader == null)
+        let controllerLoaders = this.getControllerLoaders();
+        if (controllerLoaders == null)
             return null;
 
-        let actionInfo = controllerLoader.findAction(args.virtualPath);
-        if (actionInfo == null)
+        let result: ReturnType<ControllerLoader["findAction"]> | undefined;
+        for (let key in controllerLoaders) {
+            result = controllerLoaders[key].findAction(args.virtualPath);
+            if (result != null)
+                break;
+        }
+
+        if (result == null)
             return null;
 
         let context = args as MVCRequestContext;
-        context.data = this.#serverContextData;
-        return this.executeAction(context, actionInfo.controller, actionInfo.action,
-            actionInfo.routeData)
+        context.data = this.contextData || {};
+        return this.executeAction(context, result.controller, result.action,
+            result.routeData)
             .then(r => {
                 let StatusCode: keyof RequestResult = "statusCode";
                 let Headers: keyof RequestResult = "headers";
@@ -80,9 +95,9 @@ export class MVCRequestProcessor implements RequestProcessor {
             .then(r => {
                 if (context.logLevel == "all") {
                     r.headers = r.headers || {};
-                    r.headers["controller-physical-path"] = actionInfo?.controllerPhysicalPath || "";
-                    if (typeof actionInfo?.action == "function")
-                        r.headers["member-name"] = (actionInfo?.action as Function).name;
+                    r.headers["controller-physical-path"] = result?.controllerPhysicalPath || "";
+                    if (typeof result?.action == "function")
+                        r.headers["member-name"] = (result?.action as Function).name;
                 }
                 return r;
             })

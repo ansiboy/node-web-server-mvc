@@ -1,7 +1,7 @@
 import { createWebserver, createBrowser, websitePhysicalPath } from "./common";
 import { HomeController } from "./www/controllers/home";
 import * as assert from "assert";
-import { MVCRequestProcessor, MVCRequestProcessorConfig, response } from "../out";
+import { MVCRequestProcessor, response } from "../out";
 import { HomeController as MyHomeController } from "./www/my-controllers/home";
 import { pathConcat } from "maishu-node-web-server";
 
@@ -34,7 +34,7 @@ describe("mvc-request-processor", function () {
         // }
         webServer = createWebserver();
         var p = webServer.requestProcessors.find(MVCRequestProcessor);
-        p.controllersDirectory = pathConcat(websitePhysicalPath, "my-controllers");
+        p.controllerDirectories.push(pathConcat(websitePhysicalPath, "my-controllers"));
         let url = `http://127.0.0.1:${webServer.port}/my-controllers-index`;
         //my-controllers-index
         await browser.visit(url);
@@ -46,10 +46,6 @@ describe("mvc-request-processor", function () {
     })
 
     it("404", async function () {
-
-        let mvcConfig: MVCRequestProcessorConfig = {
-            controllersDirectory: "my-controllers"
-        }
         webServer = createWebserver({
             // requestProcessorConfigs: {
             //     MVC: mvcConfig

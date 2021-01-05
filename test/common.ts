@@ -19,8 +19,8 @@ export function createWebserver(settings?: Partial<Settings>) {
 
     let w = new WebServer(settings); //startServer(settings as Settings);
     console.log(`Web server port is ${w.port}.`);
-    w.requestProcessors.add(new MVCRequestProcessor({ controllersDirectory: pathConcat(websitePhysicalPath, "controllers") }));
-
+    w.requestProcessors.add(new MVCRequestProcessor());
+    w.requestProcessors.find(MVCRequestProcessor).controllerDirectories = [pathConcat(websitePhysicalPath, "controllers")];
     return w;
 }
 

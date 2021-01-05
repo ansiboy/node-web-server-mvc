@@ -1,6 +1,10 @@
-const { startServer } = require("maishu-nwsp");
+const { WebServer } = require("maishu-node-web-server");
+const { MVCRequestProcessor } = require("maishu-nws-mvc");
 
-let w = startServer({
-    rootDirectory: __dirname,
+let w = new WebServer({
+    websiteDirectory: __dirname,
     port: 6252
-})
+});
+
+w.requestProcessors.add(new MVCRequestProcessor());
+

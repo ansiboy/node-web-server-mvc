@@ -1,5 +1,5 @@
 
-const { register } = require("../../out");
+const { register } = require("../../../out");
 class HomeController {
     index() {
         return "Hello World!!!";
@@ -11,6 +11,6 @@ class HomeController {
         return "";
     }
 }
-register(HomeController, "home", { index: "", test: "", temp: "" });
+register(HomeController, "temp", { index: "", test: "", temp: "" });
 exports.default = HomeController;
 

@@ -12,7 +12,7 @@ export const contentTypes = {
 
 export type Headers = { [key: string]: string };
 
-export class ContentResult implements RequestProcessor {
+export class ContentResult {
     private headers: Headers;
     private content: string | Buffer;
     private statusCode: number;
@@ -36,7 +36,7 @@ export class ContentResult implements RequestProcessor {
     }
 }
 
-export class RedirectResult implements RequestProcessor {
+export class RedirectResult {
     private targetURL: string;
     constructor(targetURL: string) {
         this.targetURL = targetURL
@@ -48,7 +48,7 @@ export class RedirectResult implements RequestProcessor {
     }
 }
 
-export class ProxyResut implements RequestProcessor {
+export class ProxyResut {
     private targetURL: string;
 
     constructor(targetURL: string, method?: string) {

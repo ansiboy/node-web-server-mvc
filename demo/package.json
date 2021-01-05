@@ -1,6 +1,7 @@
 {
     "dependencies": {
         "@babel/core": "^7.12.10",
+        "maishu-node-web-server": "^1.13.0",
         "maishu-nws-mvc": "file:..",
         "maishu-nwsp": "^2.8.2"
     }

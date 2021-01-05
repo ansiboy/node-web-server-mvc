@@ -1,4 +1,4 @@
-# node-web-server-mvc
+# Node MVC
 
 Node Web Server 的 MVC 插件。使用 typescript 开发，需要配合 typescript 和 Node Web Server 使用。
 
@@ -6,7 +6,34 @@ Node Web Server 的 MVC 插件。使用 typescript 开发，需要配合 typescr
 
 作者使用过的 mvc 框架包括：asp.net mvc，spring boot。后来在 nodejs 下做开发，使用过 node.js express，后来听别人介绍，也了解过 egg.js 等框架，但是 nodejs 的这些 web 开发框架，都不是作者想要的。于是开发 node-mvc ，作者在开发 node-mvc 的时候，充分借鉴了 asp.net mvc 的设计，甚至起名都借鉴了 ^\_^ 。
 
-希望这个框架能够获得大家的喜欢，QQ 讨论组：119038574
+# 安装
+
+1. Node MVC 是 Node Web Server 的一个插件，依赖于 Node Web Server，所以使用前先要安装 Node Web Server。
+
+    ```
+    npm i maishu-node-web-server -g
+    ```
+
+1. 创建项目文件夹，在项目文件夹内进行安装
+
+    ```
+    npm i maishu-nws-mvc
+    ```
+    项目文件夹如下：
+
+    ```
+    demo
+    ├── controllers
+    ├── node_modules
+    ├── static
+    |   ├── index.html
+    |   └── index.ts
+    └── package.json
+    ```
+
+    其中 controllers 用于放置控制器文件，public 用于放置静态文件。
+
+
 
 ## NODE-WEB-SERVER 配置
 
