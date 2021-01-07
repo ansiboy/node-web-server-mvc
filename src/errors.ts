@@ -125,3 +125,10 @@ export function actionResultNull(url: string) {
     error.name = actionResultNull.name;
     return error;
 }
+
+export function virtualPathNotExists(virtualPath: string) {
+    let msg = `Virtual path '${virtualPath}' is not exists`;
+    let error = new Error(msg);
+    error.name = virtualPathNotExists.name;
+    return error;
+}

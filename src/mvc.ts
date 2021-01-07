@@ -1,9 +1,10 @@
-import { RequestProcessor, RequestContext, RequestResult, VirtualDirectory, processorPriorities } from "maishu-node-web-server";
+import { RequestProcessor, RequestContext, RequestResult, VirtualDirectory, processorPriorities, getLogger } from "maishu-node-web-server";
 import { ControllerLoader } from "./controller-loader";
 import { MVCRequestContext } from "./types";
 import * as errors from "./errors";
 import { action, ActionParameterDecoder, controller, metaKeys } from "./attributes";
 import { contentTypes } from "./action-results";
+import { Logger } from "log4js";
 
 interface Options {
     controllersDirectories?: string[],
@@ -42,28 +43,46 @@ export class MVCRequestProcessor implements RequestProcessor<Options> {
         this.options.contextData = value;
     }
 
-    private getControllerLoaders(rootDir: VirtualDirectory) {
+    private getControllerLoaders(rootDir: VirtualDirectory, logger: Logger) {
 
-        let controllerDirectories = (this.controllerDirectories || []).map(o => new VirtualDirectory(o));
-        let defaultDir = rootDir.findDirectory("controllers");
-        if (controllerDirectories.length == 0 && defaultDir != null) {
-            controllerDirectories.push(defaultDir);
-        }
+        // let controllerDirectories = (this.controllerDirectories || []).map(o => new VirtualDirectory(o));
+        // let defaultDir = rootDir.findDirectory("controllers");
+        // if (controllerDirectories.length == 0 && defaultDir != null) {
+        //     controllerDirectories.push(defaultDir);
+        // }
 
-        for (let i in controllerDirectories) {
-            let physicalPath = controllerDirectories[i].physicalPath;
-            if (this.#controllerLoaders[physicalPath] != null)
+        // for (let i in controllerDirectories) {
+        //     let physicalPath = controllerDirectories[i].physicalPath;
+        //     if (this.#controllerLoaders[physicalPath] != null)
+        //         continue;
+
+        //     var dir = controllerDirectories[i];
+        //     this.#controllerLoaders[physicalPath] = new ControllerLoader(dir);
+        // }
+
+        let controllerDirectories = this.controllerDirectories || [];
+        for (let i = 0; i < controllerDirectories.length; i++) {
+            let dir = rootDir.findDirectory(controllerDirectories[i]);
+            if (dir == null) {
+                logger.log(`Virtual path ${controllerDirectories[i]} is not exists.`);
+                continue;
+            }
+
+            if (this.#controllerLoaders[dir.physicalPath] != null)
                 continue;
 
-            var dir = controllerDirectories[i];
-            this.#controllerLoaders[physicalPath] = new ControllerLoader(dir);
+            this.#controllerLoaders[dir.physicalPath] = new ControllerLoader(dir);
         }
 
         return this.#controllerLoaders;
     }
 
     execute(args: RequestContext): Promise<RequestResult> | null {
-        let controllerLoaders = this.getControllerLoaders(args.rootDirectory);
+
+        let pkg = require("../package.json");
+        let logger = getLogger(pkg.name, args.logLevel);
+
+        let controllerLoaders = this.getControllerLoaders(args.rootDirectory, logger);
         if (controllerLoaders == null)
             return null;
 

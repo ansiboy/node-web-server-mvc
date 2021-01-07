@@ -9,25 +9,14 @@ export { ContentResult, RedirectResult, ProxyResut } from "./action-results";
 export { LogLevel, getLogger } from "./logger";
 export { MVCRequestProcessor, register } from "./mvc";
 
-import { MVCRequestProcessor } from "./mvc";
+// import { MVCRequestProcessor } from "./mvc";
 
-export default function (webServer: WebServer) {
+// export default function (webServer: WebServer) {
 
 
-    let mvcProcessor = new MVCRequestProcessor();
-    mvcProcessor.controllerDirectories = [];
-    webServer.requestProcessors.add(mvcProcessor);
-    // let dir = webServer.websiteDirectory.findDirectory("controllers");
-    // if (dir) {
-    //     mvcProcessor.controllerDirectories.push(dir.physicalPath);
-    // }
+//     let mvcProcessor = new MVCRequestProcessor();
+//     mvcProcessor.controllerDirectories = [];
+//     webServer.requestProcessors.add(mvcProcessor);
 
-    // let staticFileProcessor = webServer.requestProcessors.find(StaticFileProcessor);
-    // if (staticFileProcessor) {
-    //     if (webServer.websiteDirectory.findDirectory("static"))
-    //         staticFileProcessor.staticPath = "static";
-    //     else
-    //         staticFileProcessor.staticPath = "public";
-    // }
 
-}
+// }
