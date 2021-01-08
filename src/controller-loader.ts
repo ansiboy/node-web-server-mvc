@@ -36,6 +36,10 @@ export class ControllerLoader {
             if (typeof filePath !== "string")
                 return;
 
+            let ext = path.extname(filePath);
+            if (ext != ".js")
+                return;
+
             if (!path.isAbsolute(filePath))
                 filePath = path.join(dirPath, filePath);
 
