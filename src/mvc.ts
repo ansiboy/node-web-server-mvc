@@ -64,7 +64,7 @@ export class MVCRequestProcessor implements RequestProcessor<Options> {
         for (let i = 0; i < controllerDirectories.length; i++) {
             let dir = rootDir.findDirectory(controllerDirectories[i]);
             if (dir == null) {
-                logger.log(`Virtual path ${controllerDirectories[i]} is not exists.`);
+                logger.info(`Virtual path ${controllerDirectories[i]} is not exists.`);
                 continue;
             }
 
@@ -114,6 +114,7 @@ export class MVCRequestProcessor implements RequestProcessor<Options> {
                 if (typeof r == "string")
                     return { content: r } as RequestResult;
 
+                r = r === undefined ? null : r;
                 return { content: JSON.stringify(r), headers: { "Content-Type": contentTypes.applicationJSON } } as RequestResult;
             })
             .then(r => {
