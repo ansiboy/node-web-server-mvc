@@ -1,9 +1,8 @@
-import { pathConcat, VirtualDirectory } from "maishu-node-web-server";
+import { VirtualDirectory } from "maishu-node-web-server";
 import * as errors from './errors';
 import isClass = require('is-class');
-import { CONTROLLER_REGISTER, controller } from "./attributes";
+import { CONTROLLER_REGISTER } from "./attributes";
 import { ControllerInfo } from "./types";
-import { Controller } from "./controller";
 import { ActionInfo, createAPIControllerType } from "./api-controller";
 import { RegisterCotnroller } from "./attributes";
 import * as path from "path";
@@ -157,11 +156,9 @@ export class ControllerLoader {
 
                 controllerInfo = func(this.#controllerDefines, controllerPath);
                 console.assert(controllerInfo != null);
-                // if (controllerInfo != null) {
                 let c = controllerInfo;
                 console.assert((c.path || '') != '')
                 this.loadActionInfos(c);
-                // }
             }
         }
         catch (err) {
