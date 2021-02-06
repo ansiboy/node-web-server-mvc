@@ -235,3 +235,9 @@ export let serverContext = createParameterDecorator(
         return context;
     }
 )
+
+export let contextData = createParameterDecorator(
+    async (context: MVCRequestContext): Promise<any> => {
+        return context.data;
+    }
+)

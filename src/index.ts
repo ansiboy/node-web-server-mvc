@@ -1,6 +1,6 @@
 import "reflect-metadata";
 
-export { controller, action, createParameterDecorator, routeData, request, response, serverContext } from "./attributes";
+export { controller, action, createParameterDecorator, routeData, request, response, serverContext, contextData } from "./attributes";
 export { ActionResult, ServerContext } from "./types";
 export { Controller } from "./controller";
 export { createVirtualDirecotry } from "./virtual-directory";
