@@ -11,17 +11,15 @@ interface Options {
     contextData?: any,
 }
 
-export class MVCRequestProcessor implements RequestProcessor<Options> {
+export class MVCRequestProcessor implements RequestProcessor {
 
     private static priority = processorPriorities.ProxyRequestProcessor + 1
 
     priority = MVCRequestProcessor.priority;
 
     // #serverContextData: any;
-    #controllerLoaders: { [virtualPath: string]: ControllerLoader } = {};
-    // #controllersDirectories: string[] = [];
-
-    options: Options = {};
+    private _controllerLoaders: { [virtualPath: string]: ControllerLoader } = {};
+    private options: Options = {};
 
     constructor() {
     }
@@ -68,13 +66,13 @@ export class MVCRequestProcessor implements RequestProcessor<Options> {
                 continue;
             }
 
-            if (this.#controllerLoaders[dir.physicalPath] != null)
+            if (this._controllerLoaders[dir.physicalPath] != null)
                 continue;
 
-            this.#controllerLoaders[dir.physicalPath] = new ControllerLoader(dir);
+            this._controllerLoaders[dir.physicalPath] = new ControllerLoader(dir);
         }
 
-        return this.#controllerLoaders;
+        return this._controllerLoaders;
     }
 
     execute(args: RequestContext): Promise<RequestResult> | null {
