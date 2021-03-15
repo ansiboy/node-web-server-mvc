@@ -1,4 +1,4 @@
-import { VirtualDirectory } from "maishu-node-web-server";
+import { pathConcat, VirtualDirectory } from "maishu-node-web-server";
 import * as errors from './errors';
 import isClass = require('is-class');
 import { CONTROLLER_REGISTER } from "./attributes";
@@ -13,12 +13,12 @@ import * as fs from "fs";
 
 export class ControllerLoader {
 
-    #controllerDefines: ControllerInfo[] = [];
+    private _controllerDefines: ControllerInfo[] = [];
     // 使用路径进行匹配的 action
-    #pathActions: { [path: string]: ActionInfo } = {};
+    private _pathActions: { [path: string]: ActionInfo } = {};
     // 使用路由进行匹配的 action
-    #routeActions: (ActionInfo & { route: (virtualPath: string) => any })[] = [];
-    #controllersDirectory: VirtualDirectory;
+    private _routeActions: (ActionInfo & { route: (virtualPath: string) => any })[] = [];
+    private _controllersDirectory: VirtualDirectory;
 
     constructor(controllersDirectory: VirtualDirectory) {
         if (controllersDirectory == null)
@@ -27,7 +27,7 @@ export class ControllerLoader {
         if (!fs.existsSync(controllersDirectory.physicalPath))
             throw errors.physicalPathNotExists(controllersDirectory.physicalPath);
 
-        this.#controllersDirectory = controllersDirectory;
+        this._controllersDirectory = controllersDirectory;
         this.load();
 
         let dirPath = controllersDirectory.physicalPath;
@@ -40,7 +40,7 @@ export class ControllerLoader {
                 return;
 
             if (!path.isAbsolute(filePath))
-                filePath = path.join(dirPath, filePath);
+                filePath = pathConcat(dirPath, filePath);
 
             // if (!fs.existsSync(filePath))
             //     return;
@@ -55,7 +55,7 @@ export class ControllerLoader {
 
     private load() {
         let controllerPaths: string[] = [];
-        let stack: VirtualDirectory[] = [this.#controllersDirectory];
+        let stack: VirtualDirectory[] = [this._controllersDirectory];
         while (stack.length > 0) {
             let item = stack.shift() as VirtualDirectory;
 
@@ -76,16 +76,16 @@ export class ControllerLoader {
 
         let controllerInfo = createAPIControllerType(() => {
             let actionInfos: ActionInfo[] = [
-                ...Object.getOwnPropertyNames(this.#pathActions).map(name => this.#pathActions[name]),
-                ...this.#routeActions
+                ...Object.getOwnPropertyNames(this._pathActions).map(name => this._pathActions[name]),
+                ...this._routeActions
             ];
 
             return actionInfos;
-        }, this.#controllerDefines);
+        }, this._controllerDefines);
         this.loadActionInfos(controllerInfo);
         //==============================================
 
-        console.assert(this.#controllerDefines != null);
+        console.assert(this._controllerDefines != null);
     }
 
     private onFileOrDirChanged(physicalPath: string) {
@@ -93,14 +93,14 @@ export class ControllerLoader {
         //===============================================================
         // clear controller
         delete require.cache[require.resolve(physicalPath)];
-        for (let key in this.#pathActions) {
-            if (this.#pathActions[key].controllerPhysicalPath == physicalPath)
-                delete this.#pathActions[key];
+        for (let key in this._pathActions) {
+            if (this._pathActions[key].controllerPhysicalPath == physicalPath)
+                delete this._pathActions[key];
         }
 
-        for (let key in this.#routeActions) {
-            if (this.#routeActions[key].controllerPhysicalPath == physicalPath)
-                delete this.#routeActions[key];
+        for (let key in this._routeActions) {
+            if (this._routeActions[key].controllerPhysicalPath == physicalPath)
+                delete this._routeActions[key];
         }
         //===============================================================
         if (fs.existsSync(physicalPath)) {
@@ -128,13 +128,13 @@ export class ControllerLoader {
         return controllerPaths
     }
 
-    private joinPaths(path1: string, path2: string) {
-        if (path1 == null) throw errors.arugmentNull('path1')
-        if (path2 == null) throw errors.arugmentNull('path2')
-        let p = path.join(path1, path2)
-        p = p.replace(/\\/g, '/')
-        return p
-    }
+    // private joinPaths(path1: string, path2: string) {
+    //     if (path1 == null) throw errors.arugmentNull('path1')
+    //     if (path2 == null) throw errors.arugmentNull('path2')
+    //     let p = path.join(path1, path2)
+    //     p = p.replace(/\\/g, '/')
+    //     return p
+    // }
 
 
     private loadController(controllerPath: string): void {
@@ -154,7 +154,7 @@ export class ControllerLoader {
                     continue;
                 }
 
-                controllerInfo = func(this.#controllerDefines, controllerPath);
+                controllerInfo = func(this._controllerDefines, controllerPath);
                 console.assert(controllerInfo != null);
                 let c = controllerInfo;
                 console.assert((c.path || '') != '')
@@ -172,16 +172,16 @@ export class ControllerLoader {
 
             let actionPaths = a.paths || []
             if (actionPaths.length == 0) {
-                actionPaths.push(this.joinPaths(c.path, a.memberName))
+                actionPaths.push(pathConcat(c.path, a.memberName))
             }
             for (let i = 0; i < actionPaths.length; i++) {
                 let actionPath = actionPaths[i];
                 if (typeof actionPath == "string" && actionPath[0] != '/') {
-                    actionPath = this.joinPaths(c.path, actionPath)
+                    actionPath = pathConcat(c.path, actionPath)
                 }
 
                 if (typeof actionPath == "function") {
-                    this.#routeActions.push({
+                    this._routeActions.push({
                         route: actionPath, controllerType: c.type, memberName: a.memberName,
                         actionPath: actionPath, controllerPhysicalPath: c.physicalPath
                     });
@@ -192,13 +192,13 @@ export class ControllerLoader {
                         let route = (virtualPath: string) => {
                             return p.match(virtualPath);
                         };
-                        this.#routeActions.push({
+                        this._routeActions.push({
                             route, controllerType: c.type, memberName: a.memberName,
                             actionPath, controllerPhysicalPath: c.physicalPath
                         });
                     }
                     else {
-                        this.#pathActions[actionPath] = {
+                        this._pathActions[actionPath] = {
                             controllerType: c.type, memberName: a.memberName,
                             actionPath, controllerPhysicalPath: c.physicalPath
                         }
@@ -224,7 +224,7 @@ export class ControllerLoader {
         if (virtualPath[virtualPath.length - 1] == '/' && virtualPath.length > 1)
             virtualPath = virtualPath.substr(0, virtualPath.length - 1);
 
-        let actionInfo = this.#pathActions[virtualPath];
+        let actionInfo = this._pathActions[virtualPath];
         let controller: any = null;
         let action: any = null;
         let routeData: { [key: string]: string } | null = null;
@@ -238,13 +238,16 @@ export class ControllerLoader {
         }
 
         if (action == null) {
-            for (let i = 0; i < this.#routeActions.length; i++) {
-                let r = this.#routeActions[i].route(virtualPath);
+            for (let i = 0; i < this._routeActions.length; i++) {
+                if (this._routeActions[i] == null)
+                    continue;
+
+                let r = this._routeActions[i].route(virtualPath);
                 if (r) {
                     routeData = r;
-                    controller = new this.#routeActions[i].controllerType();
-                    controllerPhysicalPath = this.#routeActions[i].controllerPhysicalPath;
-                    action = controller[this.#routeActions[i].memberName];
+                    controller = new this._routeActions[i].controllerType();
+                    controllerPhysicalPath = this._routeActions[i].controllerPhysicalPath;
+                    action = controller[this._routeActions[i].memberName];
                     break;
                 }
             }
@@ -259,7 +262,7 @@ export class ControllerLoader {
 
     /** 路由行为 */
     get routeActions() {
-        return this.#routeActions;
+        return this._routeActions;
     }
 }
 
