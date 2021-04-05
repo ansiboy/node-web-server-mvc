@@ -24,33 +24,29 @@ export class ControllerLoader {
         if (controllersDirectory == null)
             throw errors.arugmentNull("controllersDirectory");
 
-        if (!fs.existsSync(controllersDirectory.physicalPath))
-            throw errors.physicalPathNotExists(controllersDirectory.physicalPath);
+        // if (!fs.existsSync(controllersDirectory.physicalPath))
+        //     throw errors.physicalPathNotExists(controllersDirectory.physicalPath);
 
         this._controllersDirectory = controllersDirectory;
         this.load();
 
-        let dirPath = controllersDirectory.physicalPath;
-        fs.watch(dirPath).on("change", (event, filePath) => {
-            if (typeof filePath !== "string")
-                return;
+        // 说明：允许 controllersDirectory.physicalPath 对应的文件夹不存在
+        if (fs.existsSync(controllersDirectory.physicalPath)) {
+            let dirPath = controllersDirectory.physicalPath;
+            fs.watch(dirPath).on("change", (event, filePath) => {
+                if (typeof filePath !== "string")
+                    return;
 
-            let ext = path.extname(filePath);
-            if (ext != ".js")
-                return;
+                let ext = path.extname(filePath);
+                if (ext != ".js")
+                    return;
 
-            if (!path.isAbsolute(filePath))
-                filePath = pathConcat(dirPath, filePath);
+                if (!path.isAbsolute(filePath))
+                    filePath = pathConcat(dirPath, filePath);
 
-            // if (!fs.existsSync(filePath))
-            //     return;
-
-            // let stat = fs.statSync(filePath);
-            // if (stat.isFile() == false)
-            //     return;
-
-            this.onFileOrDirChanged(filePath);
-        })
+                this.onFileOrDirChanged(filePath);
+            })
+        }
     }
 
     private load() {
@@ -108,7 +104,6 @@ export class ControllerLoader {
             if (stat.isFile())
                 this.loadController(physicalPath);
         }
-        // })
     }
 
     /**
