@@ -1,6 +1,6 @@
 {
     "name": "maishu-nws-mvc",
-    "version": "1.7.4",
+    "version": "1.8.0",
     "scripts": {
         "test": "mocha",
         "build": "tsc -p src"

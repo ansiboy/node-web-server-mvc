@@ -86,7 +86,7 @@ export class MVCRequestProcessor implements RequestProcessor {
 
         let result: ReturnType<ControllerLoader["findAction"]> | undefined;
         for (let key in controllerLoaders) {
-            result = controllerLoaders[key].findAction(args.virtualPath);
+            result = controllerLoaders[key].findAction(args.virtualPath, args);
             if (result != null)
                 break;
         }
@@ -96,8 +96,7 @@ export class MVCRequestProcessor implements RequestProcessor {
 
         let context = args as MVCRequestContext;
         context.data = this.contextData || {};
-        return this.executeAction(context, result.controller, result.action,
-            result.routeData)
+        return this.executeAction(context, result.controller, result.action, result.routeData)
             .then(r => {
                 let StatusCode: keyof RequestResult = "statusCode";
                 let Headers: keyof RequestResult = "headers";

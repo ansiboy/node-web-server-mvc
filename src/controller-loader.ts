@@ -1,8 +1,8 @@
-import { pathConcat, VirtualDirectory } from "maishu-node-web-server";
+import { pathConcat, RequestContext, VirtualDirectory } from "maishu-node-web-server";
 import * as errors from './errors';
 import isClass = require('is-class');
 import { CONTROLLER_REGISTER } from "./attributes";
-import { ControllerInfo } from "./types";
+import { ActionPathFun, ControllerInfo } from "./types";
 import { ActionInfo, createAPIControllerType } from "./api-controller";
 import { RegisterCotnroller } from "./attributes";
 import * as path from "path";
@@ -17,7 +17,7 @@ export class ControllerLoader {
     // 使用路径进行匹配的 action
     private _pathActions: { [path: string]: ActionInfo } = {};
     // 使用路由进行匹配的 action
-    private _routeActions: (ActionInfo & { route: (virtualPath: string) => any })[] = [];
+    private _routeActions: (ActionInfo & { route: ActionPathFun })[] = [];
     private _controllersDirectory: VirtualDirectory;
 
     constructor(controllersDirectory: VirtualDirectory) {
@@ -46,6 +46,9 @@ export class ControllerLoader {
 
                 this.onFileOrDirChanged(filePath);
             })
+        }
+        else {
+            // TODO: 监控文件
         }
     }
 
@@ -208,7 +211,7 @@ export class ControllerLoader {
      * 通过指定的虚拟路径获取行为 
      * @param virtualPath 指定的路径
      */
-    findAction(virtualPath: string) {
+    findAction(virtualPath: string, ctx: RequestContext) {
 
         if (!virtualPath) throw errors.arugmentNull('virtualPath')
 
@@ -222,7 +225,7 @@ export class ControllerLoader {
         let actionInfo = this._pathActions[virtualPath];
         let controller: any = null;
         let action: any = null;
-        let routeData: { [key: string]: string } | null = null;
+        let routeData: ReturnType<ActionPathFun> = null;
         let controllerPhysicalPath: string | undefined;
 
         if (actionInfo != null) {
@@ -237,9 +240,9 @@ export class ControllerLoader {
                 if (this._routeActions[i] == null)
                     continue;
 
-                let r = this._routeActions[i].route(virtualPath);
+                let r = this._routeActions[i].route(virtualPath, ctx);
                 if (r) {
-                    routeData = r;
+                    routeData = r || {};
                     controller = new this._routeActions[i].controllerType();
                     controllerPhysicalPath = this._routeActions[i].controllerPhysicalPath;
                     action = controller[this._routeActions[i].memberName];

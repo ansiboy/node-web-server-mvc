@@ -22,7 +22,8 @@ export interface ActionInfo {
     paths: ActionPath[],
 }
 
-export type ActionPath = string | ((virtualPath: string) => object | null);
+export type ActionPathFun = (virtualPath: string, ctx: RequestContext) => { [key: string]: any } | null;
+export type ActionPath = string | ActionPathFun;
 
 export interface ActionResult {
     execute(res: http.ServerResponse, req: http.IncomingMessage, context: MVCRequestContext): Promise<any>
