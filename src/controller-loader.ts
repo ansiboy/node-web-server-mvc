@@ -6,10 +6,9 @@ import { ActionPathFun, ControllerInfo } from "./types";
 import { ActionInfo, createAPIControllerType } from "./api-controller";
 import { RegisterCotnroller } from "./attributes";
 import * as path from "path";
-import UrlPattern = require("url-pattern");
 import { isRouteString } from "./router";
 import * as fs from "fs";
-
+import { createRouter } from "maishu-router";
 
 export class ControllerLoader {
 
@@ -23,9 +22,6 @@ export class ControllerLoader {
     constructor(controllersDirectory: VirtualDirectory) {
         if (controllersDirectory == null)
             throw errors.arugmentNull("controllersDirectory");
-
-        // if (!fs.existsSync(controllersDirectory.physicalPath))
-        //     throw errors.physicalPathNotExists(controllersDirectory.physicalPath);
 
         this._controllersDirectory = controllersDirectory;
         this.load();
@@ -120,20 +116,11 @@ export class ControllerLoader {
         files.forEach(p => {
             if (p.endsWith('.js')) {
                 // 去掉 .js 后缀
-                controllerPaths.push(p);//.substring(0, p.length - 3)
+                controllerPaths.push(p);
             }
         })
         return controllerPaths
     }
-
-    // private joinPaths(path1: string, path2: string) {
-    //     if (path1 == null) throw errors.arugmentNull('path1')
-    //     if (path2 == null) throw errors.arugmentNull('path2')
-    //     let p = path.join(path1, path2)
-    //     p = p.replace(/\\/g, '/')
-    //     return p
-    // }
-
 
     private loadController(controllerPath: string): void {
         try {
@@ -186,7 +173,7 @@ export class ControllerLoader {
                 }
                 else {
                     if (isRouteString(actionPath)) {
-                        let p = new UrlPattern(actionPath);
+                        let p = createRouter(actionPath);//new UrlPattern(actionPath);
                         let route = (virtualPath: string) => {
                             return p.match(virtualPath);
                         };

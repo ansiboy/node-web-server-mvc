@@ -10,8 +10,8 @@
         "is-class": "0.0.9",
         "log4js": "^6.3.0",
         "maishu-node-web-server": "^1.16.6",
-        "reflect-metadata": "^0.1.13",
-        "url-pattern": "^1.0.3"
+        "maishu-router": "^1.2.1",
+        "reflect-metadata": "^0.1.13"
     },
     "devDependencies": {
         "@types/mocha": "^8.0.3",

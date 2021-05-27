@@ -1,4 +1,3 @@
-import { Controller } from "./controller";
 import { controller, register } from "./attributes";
 import { ControllerType, ActionPath, ControllerInfo } from "./types";
 import { pathConcat } from "maishu-node-web-server";
@@ -9,7 +8,7 @@ export type ActionInfo = {
 }
 
 export function createAPIControllerType(getActionInfos: () => ActionInfo[], serverContext: ControllerInfo[]) {
-    let APIControllerType = class APIController extends Controller {
+    let APIControllerType = class APIController {
         async list() {
             let actionInfos = getActionInfos();
             let r = actionInfos.map(o => ({

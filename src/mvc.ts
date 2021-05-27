@@ -3,12 +3,17 @@ import { ControllerLoader } from "./controller-loader";
 import { MVCRequestContext } from "./types";
 import * as errors from "./errors";
 import { action, ActionParameterDecoder, controller, metaKeys } from "./attributes";
-import { contentTypes } from "./action-results";
 import { Logger } from "log4js";
 
 interface Options {
     controllersDirectories?: string[],
     contextData?: any,
+}
+
+const encoding = 'UTF-8'
+const contentTypes = {
+    applicationJSON: `application/json; charset=${encoding}`,
+    textPlain: `text/plain; charset=${encoding}`,
 }
 
 export class MVCRequestProcessor implements RequestProcessor {
@@ -42,21 +47,6 @@ export class MVCRequestProcessor implements RequestProcessor {
     }
 
     private getControllerLoaders(rootDir: VirtualDirectory, logger: Logger) {
-
-        // let controllerDirectories = (this.controllerDirectories || []).map(o => new VirtualDirectory(o));
-        // let defaultDir = rootDir.findDirectory("controllers");
-        // if (controllerDirectories.length == 0 && defaultDir != null) {
-        //     controllerDirectories.push(defaultDir);
-        // }
-
-        // for (let i in controllerDirectories) {
-        //     let physicalPath = controllerDirectories[i].physicalPath;
-        //     if (this.#controllerLoaders[physicalPath] != null)
-        //         continue;
-
-        //     var dir = controllerDirectories[i];
-        //     this.#controllerLoaders[physicalPath] = new ControllerLoader(dir);
-        // }
 
         let controllerDirectories = this.controllerDirectories || [];
         for (let i = 0; i < controllerDirectories.length; i++) {
@@ -102,8 +92,6 @@ export class MVCRequestProcessor implements RequestProcessor {
                 let Headers: keyof RequestResult = "headers";
                 let Content: keyof RequestResult = "content";
 
-                // if (r == null)
-                //     return Promise.reject(errors.actionResultNull(context.req.url || ""));
                 if (r != null && r[Content] != null && (r[StatusCode] != null || r[Headers] != null)) {
                     return r as RequestResult;
                 }
