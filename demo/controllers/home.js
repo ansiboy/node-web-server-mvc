@@ -7,7 +7,7 @@ class HomeController {
     test() {
         return "Hello World";
     }
-    temp() {
+    upload() {
         return "";
     }
 }

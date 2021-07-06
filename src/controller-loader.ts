@@ -21,7 +21,7 @@ export class ControllerLoader {
 
     constructor(controllersDirectory: VirtualDirectory) {
         if (controllersDirectory == null)
-            throw errors.arugmentNull("controllersDirectory");
+            throw errors.argumentNull("controllersDirectory");
 
         this._controllersDirectory = controllersDirectory;
         this.load();
@@ -200,7 +200,7 @@ export class ControllerLoader {
      */
     findAction(virtualPath: string, ctx: RequestContext) {
 
-        if (!virtualPath) throw errors.arugmentNull('virtualPath')
+        if (!virtualPath) throw errors.argumentNull('virtualPath')
 
         // 将一个或多个的 / 变为一个 /，例如：/shop/test// 转换为 /shop/test/
         virtualPath = virtualPath.replace(/\/+/g, '/');

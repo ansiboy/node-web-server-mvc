@@ -1,11 +1,18 @@
+import { RequestResult } from "maishu-node-web-server";
 import { join } from "path";
 
-import { controller, action, Controller, routeData } from '../../../out/index';
+import { controller, action, routeData } from '../../../out/index';
 
-export class Test extends Controller {
+export class Test {
     @action()
     index() {
-        return this.content("<html><body><h1>Hello World</h1><body><html>", "text/html; charset=UTF-8")
+        let r: RequestResult = {
+            content: "<html><body><h1>Hello World</h1><body><html>",
+            headers: {
+                "content-type": "text/html; charset=UTF-8"
+            }
+        }
+        return r;
     }
 
     @action("/j")

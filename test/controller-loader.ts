@@ -12,20 +12,20 @@ describe("controller-loader", function () {
     let dir = new VirtualDirectory(path.join(__dirname, "www/controllers"));
     let controllerLoader = new ControllerLoader(dir);
 
-    it("find controller", function () {
-        let r1 = controllerLoader.findAction(actionPaths.home.index);
-        assert.notEqual(r1, null);
-        assert.notEqual(r1.controllerPhysicalPath || "", "");
+    // it("find controller", function () {
+    //     let r1 = controllerLoader.findAction(actionPaths.home.index);
+    //     assert.notEqual(r1, null);
+    //     assert.notEqual(r1.controllerPhysicalPath || "", "");
         
-        let r2 = controllerLoader.findAction(`${actionPaths.home.product}/1`);
-        assert.notEqual(r2, null);
+    //     let r2 = controllerLoader.findAction(`${actionPaths.home.product}/1`);
+    //     assert.notEqual(r2, null);
 
-        let r3 = controllerLoader.findAction(`${actionPaths.home.product}`);
-        assert.equal(r3, null);
+    //     let r3 = controllerLoader.findAction(`${actionPaths.home.product}`);
+    //     assert.equal(r3, null);
 
-        let r4 = controllerLoader.findAction(`${actionPaths.home.distributor}/a`)
-        assert.notEqual(r4, null);
-    })
+    //     let r4 = controllerLoader.findAction(`${actionPaths.home.distributor}/a`)
+    //     assert.notEqual(r4, null);
+    // })
 
 })
 

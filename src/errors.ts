@@ -9,15 +9,15 @@ export function postDataNotJSON(data: string) {
     return err;
 }
 
-export function arugmentNull(name: string) {
+export function argumentNull(name: string) {
     let error = new Error(`Argument ${name} can not be null or empty.`)
-    error.name = arugmentNull.name
+    error.name = argumentNull.name
     return error
 }
 
-export function arugmentFieldNull(fieldName: string, argumentName: string) {
+export function argumentFieldNull(fieldName: string, argumentName: string) {
     let error = new Error(`Field '${fieldName}' of argument ${argumentName} can not be null or empty.`)
-    error.name = arugmentFieldNull.name;
+    error.name = argumentFieldNull.name;
     return error
 }
 
@@ -131,4 +131,11 @@ export function virtualPathNotExists(virtualPath: string) {
     let error = new Error(msg);
     error.name = virtualPathNotExists.name;
     return error;
+}
+
+export function controllerPathIsNotVirtualPath(physicalPath: string) {
+    let msg = `Controller path ${physicalPath} is not a virtual path.`
+    let error = new Error(msg)
+    error.name = controllerDirectoriesNull.name
+    return error
 }

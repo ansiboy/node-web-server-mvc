@@ -7,6 +7,7 @@ import querystring = require('querystring');
 import url = require('url');
 import { ActionPath, MVCRequestContext } from './types';
 import { ActionInfo, ControllerType, ControllerInfo } from './types';
+import { parseMultipart } from './form-parse';
 
 export let metaKeys = {
     action: "actionMetaKey",
@@ -103,7 +104,7 @@ function registerController<T>(type: ControllerType<T>, controllerDefines: Contr
 
 function registerAction<T>(controllerDefine: ControllerInfo, memberName: keyof T, paths: ActionPath[], controllerPhysicalPath: string) {
     if (controllerDefine == null)
-        throw errors.arugmentNull('controllerDefine')
+        throw errors.argumentNull('controllerDefine')
 
     console.assert(typeof memberName == 'string')
     controllerDefine.actionDefines.push({ memberName: memberName as string, paths })
@@ -137,26 +138,33 @@ export let routeData = (function () {
             throw errors.requestNotReadable();
 
         return new Promise((reslove, reject) => {
-            var text = "";
-            request
-                .on('data', (data: { toString: () => string }) => {
-                    text = text + data.toString();
-                })
-                .on('end', () => {
+            var buffers: Buffer[] = [];
+            request.on('data', buffer => {
+                // text = text + data.toString();
+                console.assert(Buffer.isBuffer(buffer));
+                buffers.push(buffer);
+
+            }).on('end', () => {
+                try {
+                    let buffer = Buffer.concat(buffers);
+                    let text = buffer.toString("utf-8");
                     let obj;
-                    try {
-                        if (contentType.indexOf('application/json') >= 0) {
-                            obj = JSON.parse(text)
-                        }
-                        else {
-                            obj = querystring.parse(text);
-                        }
-                        reslove(obj || {});
+                    if (contentType.indexOf('application/json') >= 0) {
+                        obj = JSON.parse(text)
                     }
-                    catch (err) {
-                        reject(err);
+                    else if (contentType.indexOf('multipart/form-data') >= 0) {
+                        obj = parseMultipart(buffer, contentType);
                     }
-                })
+                    else {
+                        obj = querystring.parse(text);
+                    }
+                    reslove(obj || {});
+                }
+                catch (err) {
+                    reject(err);
+                }
+            })
+
         });
     }
 

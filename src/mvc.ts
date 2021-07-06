@@ -4,7 +4,7 @@ import { MVCRequestContext } from "./types";
 import * as errors from "./errors";
 import { action, ActionParameterDecoder, controller, metaKeys } from "./attributes";
 import { Logger } from "log4js";
-
+import * as path from "path"
 interface Options {
     controllersDirectories?: string[],
     contextData?: any,
@@ -50,6 +50,9 @@ export class MVCRequestProcessor implements RequestProcessor {
 
         let controllerDirectories = this.controllerDirectories || [];
         for (let i = 0; i < controllerDirectories.length; i++) {
+            if (path.isAbsolute(controllerDirectories[i]))
+                throw errors.controllerPathIsNotVirtualPath(controllerDirectories[i])
+
             let dir = rootDir.findDirectory(controllerDirectories[i]);
             if (dir == null) {
                 logger.info(`Virtual path ${controllerDirectories[i]} is not exists.`);
@@ -116,10 +119,10 @@ export class MVCRequestProcessor implements RequestProcessor {
     private executeAction(context: MVCRequestContext, controller: object, action: Function, routeData: { [key: string]: string } | null) {
 
         if (!controller)
-            throw errors.arugmentNull("controller")
+            throw errors.argumentNull("controller")
 
         if (!action)
-            throw errors.arugmentNull("action")
+            throw errors.argumentNull("action")
 
         routeData = routeData || {};
         let parameterDecoders: (ActionParameterDecoder<any>)[] = [];
