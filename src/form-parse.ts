@@ -9,7 +9,6 @@ export interface FormPart {
 
 export type MultipartResult = { [key: string]: string | Buffer | (string | Buffer)[] };
 
-
 export function parseMultipart(buffer: Buffer, contentType: string) {
     if (!buffer) throw errors.argumentNull("buffer");
     if (!contentType) throw errors.argumentNull("contentType");
@@ -21,28 +20,41 @@ export function parseMultipart(buffer: Buffer, contentType: string) {
 
     let reader = new BufferReader(buffer);
     let line = reader.readLine("buffer");
-    let obj: FormPart = {} as any;
-    let contentLines: Buffer[] = [];
+    let obj: FormPart | null = null;
+    let contentLines: Buffer[] | null = null;
     let formParts: FormPart[] = [];
 
     while (line != null) {
         let lineText = line.toString("utf-8").trim();
         if (lineText == `--${boundary}` || lineText == `--${boundary}--`) {
+            if (obj == null) {
+                obj = {} as any;
+            }
+            else {
+                if (contentLines == null)
+                    throw new Error("Parse content fail.");
 
-            if (contentLines.length > 0) {
+                let lastLine = contentLines[contentLines.length - 1];
+                //==============================================================================
+                // 去除最后一行的换行符
+                contentLines[contentLines.length - 1] = trim(lastLine);
+                //==============================================================================
                 obj.content = Buffer.concat(contentLines);
-                if (!obj["Content-Type"])
+                if (!obj["Content-Type"]) {
                     obj.content = obj.content.toString("utf-8");
+                }
 
                 formParts.push(obj);
 
-                obj = {} as any;
-                contentLines = [];
+                obj = null;
+                contentLines = null;
             }
-
         }
-        else if (lineText.startsWith("Content-Disposition") || lineText.startsWith("Content-Type")) {
-            lineText.split(";").map(o => o.trim()).forEach((item, i) => {
+        else if (lineText != "" && obj != null && contentLines == null) {
+            let arr = lineText.split(";").map(o => o.trim());
+            for (let i = 0; i < arr.length; i++) {
+                let item = arr[i];
+
                 if (i == 0) {
                     let arr = item.split(":").map(o => o.trim());
                     obj[arr[0] as keyof FormPart] = arr[1];
@@ -51,12 +63,12 @@ export function parseMultipart(buffer: Buffer, contentType: string) {
                     let arr = item.split("=").map(o => o.trim());
                     obj[arr[0] as keyof FormPart] = JSON.parse(arr[1]);
                 }
-            });
+            }
         }
-        else if (lineText == "") {
-            ;
+        else if (lineText == "" && obj != null && contentLines == null) {
+            contentLines = [];
         }
-        else {
+        else if (contentLines != null) {
             contentLines.push(line);
         }
         line = reader.readLine("buffer");
@@ -98,11 +110,25 @@ function parseContentType(contentType: string) {
     return r;
 }
 
+const rchar = Buffer.from('\r')[0];
+const nchar = Buffer.from('\n')[0];
+
+export function trim(line: Buffer) {
+    let latest = line[line.length - 1];
+    let secondToLatest = line.length >= 2 ? line[line.length - 2] : null;
+    if (latest == nchar && secondToLatest == rchar) {
+        return line.slice(0, line.length - 2);
+    }
+    else if (latest == nchar || latest == rchar) {
+        return line.slice(0, line.length - 1);
+    }
+
+    return line;
+}
+
 class BufferReader {
     private buffer: Buffer;
     private position: number;
-    private rchar = Buffer.from('\r')[0];
-    private nchar = Buffer.from('\n')[0];
 
     constructor(buffer: Buffer) {
         if (!buffer) throw errors.argumentNull("buffer");
@@ -131,7 +157,7 @@ class BufferReader {
             line.push(this.buffer[this.position]);
             this.position = this.position + 1;
 
-            if (line[line.length - 1] == this.nchar) {
+            if (line[line.length - 1] == nchar) {
                 break;
             }
         }
