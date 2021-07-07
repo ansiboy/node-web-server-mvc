@@ -139,3 +139,10 @@ export function controllerPathIsNotVirtualPath(physicalPath: string) {
     error.name = controllerDirectoriesNull.name
     return error
 }
+
+export function notFindBoundaryInContentType(contentType: string) {
+    let msg = `Can not find boundary in content type ${contentType}.`;
+    let error = new Error(msg);
+    error.name = notFindBoundaryInContentType.name;
+    return error;
+}

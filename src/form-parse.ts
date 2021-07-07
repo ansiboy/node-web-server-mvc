@@ -16,7 +16,7 @@ export function parseMultipart(buffer: Buffer, contentType: string) {
     let c = parseContentType(contentType);
     let boundary = c.boundary;
     if (!boundary)
-        throw new Error(`Content type ${contentType} is incorrect.`);
+        throw errors.notFindBoundaryInContentType(contentType);//new Error(`Content type ${contentType} is incorrect.`);
 
     let reader = new BufferReader(buffer);
     let line = reader.readLine("buffer");
