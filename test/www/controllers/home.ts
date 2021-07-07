@@ -62,5 +62,10 @@ export class HomeController {
         return new ContentResult("Hello World", {})
     }
 
+    @action(actionPaths.home.upload)
+    upload(@routeData d) {
+        debugger;
+    }
+
 
 }

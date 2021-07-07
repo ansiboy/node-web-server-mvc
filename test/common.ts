@@ -11,7 +11,15 @@ export function createWebserver(settings?: Partial<Settings>) {
         // staticRootDirectory: path.join(__dirname, "www"),
         // controllerDirectory: path.join(__dirname, "www", "controllers"),
         websiteDirectory: websitePhysicalPath,
-        // requestProcessorTypes: [MVCRequestProcessor, ...WebServer.defaultRequestProcessorTypes]
+        processors: {
+            Headers: {
+                headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "*",
+                    "Access-Control-Allow-Headers": "*"
+                }
+            }
+        },
     }
 
 
