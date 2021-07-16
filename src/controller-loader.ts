@@ -1,6 +1,5 @@
 import { pathConcat, RequestContext, VirtualDirectory } from "maishu-node-web-server";
 import * as errors from './errors';
-import isClass = require('is-class');
 import { CONTROLLER_REGISTER } from "./attributes";
 import { ActionPathFun, ControllerInfo } from "./types";
 import { ActionInfo, createAPIControllerType } from "./api-controller";
@@ -10,13 +9,12 @@ import { isRouteString } from "./router";
 import * as fs from "fs";
 import { createRouter } from "maishu-router";
 
+const PathActions = "maishu-node-mvc-PathActions";
+const RouteActions = "maishu-node-mvc-RouteActions";
+const ControllerDefines = "maishu-node-mvc-ControllerDefines";
+
 export class ControllerLoader {
 
-    private static _controllerDefines: ControllerInfo[] = [];
-    // 使用路径进行匹配的 action
-    private _pathActions: { [path: string]: ActionInfo } = {};
-    // 使用路由进行匹配的 action
-    private _routeActions: (ActionInfo & { route: ActionPathFun })[] = [];
     private _controllersDirectory: VirtualDirectory;
 
     constructor(controllersDirectory: VirtualDirectory) {
@@ -49,7 +47,19 @@ export class ControllerLoader {
     }
 
     static get controllerDefines() {
-        return this._controllerDefines;
+        let r = (global as any)[ControllerDefines] = (global as any)[ControllerDefines] || [];
+        return r;
+    }
+
+    /** 使用路径进行匹配的 action */
+    get pathActions(): { [path: string]: ActionInfo } {
+        let r = (global as any)[PathActions] = (global as any)[PathActions] || {};
+        return r;
+    }
+
+    get routeActions(): (ActionInfo & { route: ActionPathFun })[] {
+        let r = (global as any)[RouteActions] = (global as any)[RouteActions] || [];
+        return r;
     }
 
     private load() {
@@ -75,8 +85,8 @@ export class ControllerLoader {
 
         let controllerInfo = createAPIControllerType(() => {
             let actionInfos: ActionInfo[] = [
-                ...Object.getOwnPropertyNames(this._pathActions).map(name => this._pathActions[name]),
-                ...this._routeActions
+                ...Object.getOwnPropertyNames(this.pathActions).map(name => this.pathActions[name]),
+                ...this.routeActions
             ];
 
             return actionInfos;
@@ -92,14 +102,14 @@ export class ControllerLoader {
         //===============================================================
         // clear controller
         delete require.cache[require.resolve(physicalPath)];
-        for (let key in this._pathActions) {
-            if (this._pathActions[key].controllerPhysicalPath == physicalPath)
-                delete this._pathActions[key];
+        for (let key in this.pathActions) {
+            if (this.pathActions[key].controllerPhysicalPath == physicalPath)
+                delete this.pathActions[key];
         }
 
-        for (let key in this._routeActions) {
-            if (this._routeActions[key].controllerPhysicalPath == physicalPath)
-                delete this._routeActions[key];
+        for (let key in this.routeActions) {
+            if (this.routeActions[key].controllerPhysicalPath == physicalPath)
+                delete this.routeActions[key];
         }
         //===============================================================
         if (fs.existsSync(physicalPath)) {
@@ -133,17 +143,13 @@ export class ControllerLoader {
             let propertyNames = Object.getOwnPropertyNames(mod)
             for (let i = 0; i < propertyNames.length; i++) {
                 let ctrlType = mod[propertyNames[i]]
-                if (!isClass(ctrlType)) {
-                    continue
-                }
-
                 let controllerInfo: ControllerInfo | null = null;
                 let func: RegisterCotnroller = ctrlType.prototype[CONTROLLER_REGISTER];
                 if (func == null) {
                     continue;
                 }
 
-                controllerInfo = func(ControllerLoader._controllerDefines, controllerPath);
+                controllerInfo = func(ControllerLoader.controllerDefines, controllerPath);
                 console.assert(controllerInfo != null);
                 let c = controllerInfo;
                 console.assert((c.path || '') != '')
@@ -170,7 +176,7 @@ export class ControllerLoader {
                 }
 
                 if (typeof actionPath == "function") {
-                    this._routeActions.push({
+                    this.routeActions.push({
                         route: actionPath, controllerType: c.type, memberName: a.memberName,
                         actionPath: actionPath, controllerPhysicalPath: c.physicalPath
                     });
@@ -181,13 +187,13 @@ export class ControllerLoader {
                         let route = (virtualPath: string) => {
                             return p.match(virtualPath);
                         };
-                        this._routeActions.push({
+                        this.routeActions.push({
                             route, controllerType: c.type, memberName: a.memberName,
                             actionPath, controllerPhysicalPath: c.physicalPath
                         });
                     }
                     else {
-                        this._pathActions[actionPath] = {
+                        this.pathActions[actionPath] = {
                             controllerType: c.type, memberName: a.memberName,
                             actionPath, controllerPhysicalPath: c.physicalPath
                         }
@@ -213,7 +219,7 @@ export class ControllerLoader {
         if (virtualPath[virtualPath.length - 1] == '/' && virtualPath.length > 1)
             virtualPath = virtualPath.substr(0, virtualPath.length - 1);
 
-        let actionInfo = this._pathActions[virtualPath];
+        let actionInfo = this.pathActions[virtualPath];
         let controller: any = null;
         let action: any = null;
         let routeData: ReturnType<ActionPathFun> = null;
@@ -227,16 +233,16 @@ export class ControllerLoader {
         }
 
         if (action == null) {
-            for (let i = 0; i < this._routeActions.length; i++) {
-                if (this._routeActions[i] == null)
+            for (let i = 0; i < this.routeActions.length; i++) {
+                if (this.routeActions[i] == null)
                     continue;
 
-                let r = this._routeActions[i].route(virtualPath, ctx);
+                let r = this.routeActions[i].route(virtualPath, ctx);
                 if (r) {
                     routeData = r || {};
-                    controller = new this._routeActions[i].controllerType();
-                    controllerPhysicalPath = this._routeActions[i].controllerPhysicalPath;
-                    action = controller[this._routeActions[i].memberName];
+                    controller = new this.routeActions[i].controllerType();
+                    controllerPhysicalPath = this.routeActions[i].controllerPhysicalPath;
+                    action = controller[this.routeActions[i].memberName];
                     break;
                 }
             }
@@ -249,10 +255,6 @@ export class ControllerLoader {
         return { action, controller, routeData, controllerPhysicalPath };
     }
 
-    /** 路由行为 */
-    get routeActions() {
-        return this._routeActions;
-    }
 }
 
 let innerErrors = {

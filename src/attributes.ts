@@ -93,12 +93,22 @@ function registerController<T>(type: ControllerType<T>, controllerDefines: Contr
 
     let controllerDefine = controllerDefines.filter(o => o.type == type)[0]
     if (controllerDefine != null) {
-        let index = controllerDefines.indexOf(controllerDefine);
-        controllerDefines.splice(index, 1);
+        let actionDefines = controllerDefine.actionDefines;
+        if (actionDefines) {
+            let itemsToRemove: ActionInfo[] = []
+            for (let i = 0; i < actionDefines.length; i++) {
+                if (!controllerDefine.type.prototype[actionDefines[i].memberName]) {
+                    itemsToRemove.push(actionDefines[i]);
+                }
+            }
+            controllerDefine.actionDefines = actionDefines.filter(o => itemsToRemove.indexOf(o) < 0);
+        }
+    }
+    else {
+        controllerDefine = { type: type, actionDefines: [], path, physicalPath: controllerPhysicalPath };
+        controllerDefines.push(controllerDefine)
     }
 
-    controllerDefine = { type: type, actionDefines: [], path, physicalPath: controllerPhysicalPath };
-    controllerDefines.push(controllerDefine)
 
     return controllerDefine
 }
