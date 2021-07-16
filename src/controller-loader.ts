@@ -12,7 +12,7 @@ import { createRouter } from "maishu-router";
 
 export class ControllerLoader {
 
-    private _controllerDefines: ControllerInfo[] = [];
+    private static _controllerDefines: ControllerInfo[] = [];
     // 使用路径进行匹配的 action
     private _pathActions: { [path: string]: ActionInfo } = {};
     // 使用路由进行匹配的 action
@@ -48,6 +48,10 @@ export class ControllerLoader {
         }
     }
 
+    static get controllerDefines() {
+        return this._controllerDefines;
+    }
+
     private load() {
         let controllerPaths: string[] = [];
         let stack: VirtualDirectory[] = [this._controllersDirectory];
@@ -76,11 +80,11 @@ export class ControllerLoader {
             ];
 
             return actionInfos;
-        }, this._controllerDefines);
+        });
         this.loadActionInfos(controllerInfo);
         //==============================================
 
-        console.assert(this._controllerDefines != null);
+
     }
 
     private onFileOrDirChanged(physicalPath: string) {
@@ -139,7 +143,7 @@ export class ControllerLoader {
                     continue;
                 }
 
-                controllerInfo = func(this._controllerDefines, controllerPath);
+                controllerInfo = func(ControllerLoader._controllerDefines, controllerPath);
                 console.assert(controllerInfo != null);
                 let c = controllerInfo;
                 console.assert((c.path || '') != '')

@@ -7,7 +7,7 @@ export type ActionInfo = {
     controllerPhysicalPath: string
 }
 
-export function createAPIControllerType(getActionInfos: () => ActionInfo[], serverContext: ControllerInfo[]) {
+export function createAPIControllerType(getActionInfos: () => ActionInfo[]) {
     let APIControllerType = class APIController {
         async list() {
             let actionInfos = getActionInfos();
@@ -21,6 +21,6 @@ export function createAPIControllerType(getActionInfos: () => ActionInfo[], serv
             return r;
         }
     }
-    return register(APIControllerType, serverContext, pathConcat(__filename, ""), { "list": ["/api/action/list", "/nws/actions"] });
+    return register(APIControllerType, pathConcat(__filename, ""), { "list": ["/api/action/list", "/nws/actions"] });
 
 }

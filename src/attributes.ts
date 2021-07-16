@@ -8,6 +8,7 @@ import url = require('url');
 import { ActionPath, MVCRequestContext } from './types';
 import { ActionInfo, ControllerType, ControllerInfo } from './types';
 import { parseMultipart } from './form-parse';
+import { ControllerLoader } from './controller-loader';
 
 export let metaKeys = {
     action: "actionMetaKey",
@@ -68,10 +69,10 @@ export function action(...paths: ActionPath[]) {
     };
 }
 
-export function register<T>(type: ControllerType<T>, serverContext: ControllerInfo[], controllerPhysicalPath: string,
+export function register<T>(type: ControllerType<T>, controllerPhysicalPath: string,
     actions: { [member: string]: string | string[] }, path?: string) {
     controller(path)(type);
-    let controllerInfo = registerController(type, serverContext, controllerPhysicalPath, path);
+    let controllerInfo = registerController(type, ControllerLoader.controllerDefines, controllerPhysicalPath, path);
     for (let member in actions) {
         let path = actions[member]
         let actionPaths: string[] = typeof path == "string" ? [path] : path;
