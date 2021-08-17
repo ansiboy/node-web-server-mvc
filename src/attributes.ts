@@ -224,6 +224,12 @@ export let routeData = (function () {
             obj = Object.assign(obj, data)
         }
 
+        for (let key in obj) {
+            if (obj[key]) {
+                obj[key] = decodeURI(obj[key]);
+            }
+        }
+
         return obj;
     })
 
