@@ -144,7 +144,7 @@ export class ControllerLoader {
             for (let i = 0; i < propertyNames.length; i++) {
                 let ctrlType = mod[propertyNames[i]]
                 let controllerInfo: ControllerInfo | null = null;
-                let func: RegisterCotnroller = ctrlType.prototype[CONTROLLER_REGISTER];
+                let func: RegisterCotnroller = ctrlType.prototype == null ? null : ctrlType.prototype[CONTROLLER_REGISTER];
                 if (func == null) {
                     continue;
                 }
