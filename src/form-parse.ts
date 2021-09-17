@@ -20,15 +20,15 @@ export function parseMultipart(buffer: Buffer, contentType: string) {
 
     let reader = new BufferReader(buffer);
     let line = reader.readLine("buffer");
-    let obj: FormPart | null = null;
+    let currentFormPart: FormPart | null = null;
     let contentLines: Buffer[] | null = null;
     let formParts: FormPart[] = [];
 
     while (line != null) {
         let lineText = line.toString("utf-8").trim();
         if (lineText == `--${boundary}` || lineText == `--${boundary}--`) {
-            if (obj == null) {
-                obj = {} as any;
+            if (currentFormPart == null) {
+                currentFormPart = {} as FormPart;
             }
             else {
                 if (contentLines == null)
@@ -39,33 +39,38 @@ export function parseMultipart(buffer: Buffer, contentType: string) {
                 // 去除最后一行的换行符
                 contentLines[contentLines.length - 1] = trim(lastLine);
                 //==============================================================================
-                obj.content = Buffer.concat(contentLines);
-                if (!obj["Content-Type"]) {
-                    obj.content = obj.content.toString("utf-8");
+                currentFormPart.content = Buffer.concat(contentLines);
+                if (!currentFormPart["Content-Type"]) {
+                    currentFormPart.content = currentFormPart.content.toString("utf-8");
                 }
 
-                formParts.push(obj);
+                formParts.push(currentFormPart);
 
-                obj = null;
+                currentFormPart = {} as FormPart;
                 contentLines = null;
             }
         }
-        else if (lineText != "" && obj != null && contentLines == null) {
-            let arr = lineText.split(";").map(o => o.trim());
-            for (let i = 0; i < arr.length; i++) {
-                let item = arr[i];
+        else if (lineText != "" && currentFormPart != null && contentLines == null) {
+            let keyValues = lineText.split(";").map(o => o.trim());
+            for (let i = 0; i < keyValues.length; i++) {
+                let item = keyValues[i];
 
                 if (i == 0) {
                     let arr = item.split(":").map(o => o.trim());
-                    obj[arr[0] as keyof FormPart] = arr[1];
+                    currentFormPart[arr[0] as keyof FormPart] = arr[1];
                 }
                 else {
-                    let arr = item.split("=").map(o => o.trim());
-                    obj[arr[0] as keyof FormPart] = JSON.parse(arr[1]);
+                    let index = item.indexOf("=");
+                    console.assert(index > 0, 'String is not contains \'=\' signal.');
+                    let name: string = item.substr(0, index);
+                    let value = item.substr(index + 1);
+                    (currentFormPart as any)[name] = JSON.parse(value);
+                    // let arr = item.split("=", 2).map(o => o.trim());
+                    // currentFormPart[arr[0]] = JSON.parse(arr[1]);
                 }
             }
         }
-        else if (lineText == "" && obj != null && contentLines == null) {
+        else if (lineText == "" && currentFormPart != null && contentLines == null) {
             contentLines = [];
         }
         else if (contentLines != null) {

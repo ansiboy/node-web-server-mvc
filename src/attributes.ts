@@ -206,7 +206,8 @@ export let routeData = (function () {
             }
         }
         else {
-            obj = querystring.parse(query);
+            let q = decodeURI(query);
+            obj = querystring.parse(q);
         }
 
         return obj;
@@ -222,12 +223,6 @@ export let routeData = (function () {
         if (context.req.method != 'GET') {
             let data = await getPostObject(context.req);
             obj = Object.assign(obj, data)
-        }
-
-        for (let key in obj) {
-            if (obj[key]) {
-                obj[key] = decodeURI(obj[key]);
-            }
         }
 
         return obj;
