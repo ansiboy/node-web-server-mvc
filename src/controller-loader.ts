@@ -24,26 +24,26 @@ export class ControllerLoader {
         this._controllersDirectory = controllersDirectory;
         this.load();
 
-        // 说明：允许 controllersDirectory.physicalPath 对应的文件夹不存在
-        if (fs.existsSync(controllersDirectory.physicalPath)) {
-            let dirPath = controllersDirectory.physicalPath;
-            fs.watch(dirPath).on("change", (event, filePath) => {
-                if (typeof filePath !== "string")
-                    return;
+        // // 说明：允许 controllersDirectory.physicalPath 对应的文件夹不存在
+        // if (fs.existsSync(controllersDirectory.physicalPath)) {
+        //     let dirPath = controllersDirectory.physicalPath;
+        //     fs.watch(dirPath).on("change", (event, filePath) => {
+        //         if (typeof filePath !== "string")
+        //             return;
 
-                let ext = path.extname(filePath);
-                if (ext != ".js")
-                    return;
+        //         let ext = path.extname(filePath);
+        //         if (ext != ".js")
+        //             return;
 
-                if (!path.isAbsolute(filePath))
-                    filePath = pathConcat(dirPath, filePath);
+        //         if (!path.isAbsolute(filePath))
+        //             filePath = pathConcat(dirPath, filePath);
 
-                this.onFileOrDirChanged(filePath);
-            })
-        }
-        else {
-            // TODO: 监控文件
-        }
+        //         this.onFileOrDirChanged(filePath);
+        //     })
+        // }
+        // else {
+        //     // TODO: 监控文件
+        // }
     }
 
     static get controllerDefines() {
@@ -156,7 +156,7 @@ export class ControllerLoader {
                 this.loadActionInfos(c);
             }
         }
-        catch (err) {
+        catch (err: any) {
             console.error(err)
             throw innerErrors.loadControllerFail(controllerPath, err)
         }
