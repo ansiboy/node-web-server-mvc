@@ -240,6 +240,12 @@ export class ControllerLoader {
                 let r = this.routeActions[i].route(virtualPath, ctx);
                 if (r) {
                     routeData = r || {};
+                    for (let key in routeData) {
+                        if (!routeData[key])
+                            continue;
+
+                        routeData[key] = decodeURIComponent(routeData[key]);
+                    }
                     controller = new this.routeActions[i].controllerType();
                     controllerPhysicalPath = this.routeActions[i].controllerPhysicalPath;
                     action = controller[this.routeActions[i].memberName];
