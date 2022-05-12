@@ -46,7 +46,7 @@ export class MVCRequestProcessor implements RequestProcessor {
         this.options.contextData = value;
     }
 
-    private getControllerLoaders(rootDir: VirtualDirectory, logger: Logger) {
+    private async getControllerLoaders(rootDir: VirtualDirectory, logger: Logger) {
 
         let controllerDirectories = this.controllerDirectories || [];
         for (let i = 0; i < controllerDirectories.length; i++) {
@@ -62,18 +62,18 @@ export class MVCRequestProcessor implements RequestProcessor {
             if (this._controllerLoaders[dir.physicalPath] != null)
                 continue;
 
-            this._controllerLoaders[dir.physicalPath] = new ControllerLoader(dir);
+            this._controllerLoaders[dir.physicalPath] = await ControllerLoader.getInstance(dir);//new ControllerLoader(dir);
         }
 
         return this._controllerLoaders;
     }
 
-    execute(args: RequestContext): Promise<RequestResult> | null {
+    async execute(args: RequestContext): Promise<RequestResult | null> {
 
         let pkg = require("../package.json");
         let logger = getLogger(pkg.name, args.logLevel);
 
-        let controllerLoaders = this.getControllerLoaders(args.rootDirectory, logger);
+        let controllerLoaders = await this.getControllerLoaders(args.rootDirectory, logger);
         if (controllerLoaders == null)
             return null;
 

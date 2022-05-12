@@ -1,4 +1,4 @@
-import { pathConcat, RequestContext, VirtualDirectory } from "maishu-node-web-server";
+import { pathConcat, RequestContext, VirtualDirectory, loadModule } from "maishu-node-web-server";
 import * as errors from './errors';
 import { CONTROLLER_REGISTER } from "./attributes";
 import { ActionPathFun, ControllerInfo } from "./types";
@@ -17,12 +17,12 @@ export class ControllerLoader {
 
     private _controllersDirectory: VirtualDirectory;
 
-    constructor(controllersDirectory: VirtualDirectory) {
+    private constructor(controllersDirectory: VirtualDirectory) {
         if (controllersDirectory == null)
             throw errors.argumentNull("controllersDirectory");
 
         this._controllersDirectory = controllersDirectory;
-        this.load();
+        // this.load();
 
         // // 说明：允许 controllersDirectory.physicalPath 对应的文件夹不存在
         // if (fs.existsSync(controllersDirectory.physicalPath)) {
@@ -46,6 +46,17 @@ export class ControllerLoader {
         // }
     }
 
+    static instances: { [path: string]: ControllerLoader } = {};
+    static async getInstance(dir: VirtualDirectory) {
+        if (this.instances[dir.virtualPath] == null) {
+            this.instances[dir.virtualPath] = new ControllerLoader(dir);
+            await this.instances[dir.virtualPath].load();
+            return this.instances[dir.virtualPath];
+        }
+
+        return this.instances[dir.virtualPath];
+    }
+
     static get controllerDefines() {
         let r = (global as any)[ControllerDefines] = (global as any)[ControllerDefines] || [];
         return r;
@@ -62,7 +73,7 @@ export class ControllerLoader {
         return r;
     }
 
-    private load() {
+    private async load() {
         let controllerPaths: string[] = [];
         let stack: VirtualDirectory[] = [this._controllersDirectory];
         while (stack.length > 0) {
@@ -75,10 +86,12 @@ export class ControllerLoader {
             stack.unshift(...dirs);
         }
 
-        controllerPaths.forEach(c => {
-            this.loadController(c);
-            // this.watchFile(c);
-        })
+        // controllerPaths.forEach(c => {
+        //     this.loadController(c);
+        // })
+
+        let ps = controllerPaths.map(c => this.loadController(c));
+        await Promise.all(ps);
 
         //=============================================
         // 注册内置的控制器
@@ -136,9 +149,9 @@ export class ControllerLoader {
         return controllerPaths
     }
 
-    private loadController(controllerPath: string): void {
+    private async loadController(controllerPath: string): Promise<void> {
         try {
-            var mod = require(controllerPath);
+            let mod = await loadModule(controllerPath);
             console.assert(mod != null);
             let propertyNames = Object.getOwnPropertyNames(mod)
             for (let i = 0; i < propertyNames.length; i++) {

@@ -1,6 +1,6 @@
 {
     "name": "maishu-nws-mvc",
-    "version": "1.17.0",
+    "version": "1.18.0",
     "scripts": {
         "test": "mocha",
         "build": "tsc -p src"
@@ -9,7 +9,7 @@
         "chokidar": "^3.4.3",
         "is-class": "0.0.9",
         "log4js": "^6.3.0",
-        "maishu-node-web-server": "^1.16.6",
+        "maishu-node-web-server": "^1.26.0",
         "maishu-router": "^1.4.8",
         "reflect-metadata": "^0.1.13"
     },
